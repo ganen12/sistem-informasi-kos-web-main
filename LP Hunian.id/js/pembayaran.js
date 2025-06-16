@@ -118,8 +118,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
             const tanggal = document.getElementById('tanggalPembayaran').value;
             const nama = document.getElementById('nama').value;
-            const properti = document.getElementById('properti').value;
-            const kamar = document.getElementById('kamar').value;
             const totalSewa = formatRupiah(document.getElementById('totalSewa').value);
             const jumlahDibayar = formatRupiah(document.getElementById('jumlahDibayar').value);
             const jatuhTempo = document.getElementById('jatuhTempo').value;
@@ -129,8 +127,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 const kolom = barisSedangDiedit.querySelectorAll('td');
                 kolom[0].innerText = tanggal;
                 kolom[1].innerText = nama;
-                kolom[2].innerText = properti;
-                kolom[3].innerText = kamar;
                 kolom[4].innerText = totalSewa;
                 kolom[5].innerText = jumlahDibayar;
                 kolom[6].innerText = jatuhTempo;
@@ -142,8 +138,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 baris.innerHTML = `
                     <td>${tanggal}</td>
                     <td>${nama}</td>
-                    <td>${properti}</td>
-                    <td>${kamar}</td>
                     <td>${totalSewa}</td>
                     <td>${jumlahDibayar}</td>
                     <td>${jatuhTempo}</td>
@@ -165,8 +159,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     const kolom = baris.querySelectorAll('td');
                     document.getElementById('tanggalPembayaran').value = kolom[0].innerText;
                     document.getElementById('nama').value = kolom[1].innerText;
-                    document.getElementById('properti').value = kolom[2].innerText;
-                    document.getElementById('kamar').value = kolom[3].innerText;
                     document.getElementById('totalSewa').value = kolom[4].innerText.replace(/\D/g, '');
                     document.getElementById('jumlahDibayar').value = kolom[5].innerText.replace(/\D/g, '');
                     document.getElementById('jatuhTempo').value = kolom[6].innerText;

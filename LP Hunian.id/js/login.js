@@ -19,9 +19,9 @@ function validateLogin() {
     else if (email === 'user@gmail.com' && password === 'user123') {
         localStorage.setItem('role', role);
         if (role === 'pembeli') {
-          window.location.href = 'dashboardutama.html';
+          window.location.href = 'dashboardpembeli.html';
         } else {
-          window.location.href = 'dashboardpemilik.html';
+          window.location.href = 'dashboardutama.html';
         }
       }
     else {

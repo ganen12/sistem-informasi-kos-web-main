@@ -12,10 +12,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const email = document.getElementById('email').value;
             const noHP = document.getElementById('noHP').value;
             const alamat = document.getElementById('alamat').value;
-            const tanggalMasuk = document.getElementById('tanggalMasuk').value;
-            const durasi = document.getElementById('durasiSewa').value;
-            const nomorKamar = document.getElementById('nomorKamar').value;
-            const status = document.getElementById('status').value;
 
             if (barisEdit) {
                 const kolom = barisEdit.querySelectorAll('td');
@@ -23,10 +19,6 @@ document.addEventListener('DOMContentLoaded', function() {
                 kolom[2].innerText = email;
                 kolom[3].innerText = noHP;
                 kolom[4].innerText = alamat;
-                kolom[5].innerText = tanggalMasuk;
-                kolom[6].innerText = durasi;
-                kolom[7].innerText = nomorKamar;
-                kolom[8].innerText = status;
                 tampilkanToast("Data penyewa berhasil diperbarui!");
                 barisEdit = null;
             } else {
@@ -37,10 +29,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     <td>${email}</td>
                     <td>${noHP}</td>
                     <td>${alamat}</td>
-                    <td>${tanggalMasuk}</td>
-                    <td>${durasi}</td>
-                    <td>${nomorKamar}</td>
-                    <td>${status}</td>
                     <td>
                         <button class="btn btn-sm btn-primary btn-edit">Edit</button>
                         <button class="btn btn-sm btn-danger btn-delete">Hapus</button>
@@ -58,10 +46,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('email').value = kolom[2].innerText;
                     document.getElementById('noHP').value = kolom[3].innerText;
                     document.getElementById('alamat').value = kolom[4].innerText;
-                    document.getElementById('tanggalMasuk').value = kolom[5].innerText;
-                    document.getElementById('durasiSewa').value = kolom[6].innerText;
-                    document.getElementById('nomorKamar').value = kolom[7].innerText;
-                    document.getElementById('status').value = kolom[8].innerText;
                     new bootstrap.Modal(document.getElementById('tambahPenyewaModal')).show();
                 });
 
