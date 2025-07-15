@@ -61,9 +61,9 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
+          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.php">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="Beli.php">Beli</a></li>
+          <li class="nav-item"><a class="nav-link" href="Sewa.php">Sewa</a></li>
           <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
                 <li class="nav-item dropdown">
@@ -92,15 +92,15 @@
                         <a href="propertiku.html" class="nav-link active"><i class="bi bi-box-arrow-right me-2 menu-list"></i>Dashboard</a>
                     </li>
                     <li class="mt-4 section-label">Data</li>
-                    <li><a href="kelolaproperti.html" class="nav-link"><i class="bi bi-house-door me-2 menu-list"></i>Properti</a></li>
-                    <li><a href="kamar.html" class="nav-link"><i class="bi bi-door-closed me-2 menu-list"></i>Kamar</a></li>
-                    <li><a href="penyewa.html" class="nav-link"><i class="bi bi-people-fill me-2 menu-list"></i>Penyewa</a></li>
+                    <li><a href="kelolaproperti.php" class="nav-link"><i class="bi bi-house-door me-2 menu-list"></i>Properti</a></li>
+                    <li><a href="kamar.php" class="nav-link"><i class="bi bi-door-closed me-2 menu-list"></i>Kamar</a></li>
+                    <li><a href="penyewa.php" class="nav-link"><i class="bi bi-people-fill me-2 menu-list"></i>Penyewa</a></li>
                     <li class="mt-4 section-label">Transaksi</li>
-                    <li><a href="pemesanan.html" class="nav-link"><i class="bi bi-book me-2 menu-list"></i>Pemesanan</a></li>
-                    <li><a href="pembayaran.html" class="nav-link"><i class="bi bi-receipt me-2 menu-list"></i>Pembayaran</a></li>
-                    <li><a href="pengeluaran.html" class="nav-link"><i class="bi bi-stack me-2 menu-list"></i>Pengeluaran</a></li>
+                    <li><a href="pemesanan.php" class="nav-link"><i class="bi bi-book me-2 menu-list"></i>Pemesanan</a></li>
+                    <li><a href="pembayaran.php" class="nav-link"><i class="bi bi-receipt me-2 menu-list"></i>Pembayaran</a></li>
+                    <li><a href="pengeluaran.php" class="nav-link"><i class="bi bi-stack me-2 menu-list"></i>Pengeluaran</a></li>
                     <li class="mt-4 section-label">Lainnya</li>
-                    <li><a href="keluhan.html" class="nav-link"><i class="bi bi-exclamation-triangle me-2 menu-list"></i>Keluhan</a></li>
+                    <li><a href="keluhan.php" class="nav-link"><i class="bi bi-exclamation-triangle me-2 menu-list"></i>Keluhan</a></li>
                 </ul>
             </nav>
 

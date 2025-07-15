@@ -60,13 +60,13 @@
             <a class="nav-link active" href="#">Beranda</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Beli.html">Beli</a>
+            <a class="nav-link" href="../eksplor/Beli.php">Beli</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Sewa.html">Sewa</a>
+            <a class="nav-link" href="../eksplor/Sewa.php">Sewa</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="propertiku.html">Propertiku</a>
+            <a class="nav-link" href="../propertiku/propertiku.php">Propertiku</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Bantuan</a>
