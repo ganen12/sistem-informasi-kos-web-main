@@ -1,3 +1,8 @@
+<?php
+require_once "../../helpers/auth.php";
+require_login();
+?>
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -12,10 +17,17 @@
       font-family: 'Montserrat', sans-serif;
       background-color: #e4e4e4;
     }
+
     .sidebar {
-      height: 100vh;
-      background-color: #252321;
-      color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        background-color: #252321;
+        color: white;
+        z-index: 1030; /* agar di atas konten lain */
+        overflow-y: auto;
+        margin-top: 56px;
     }
     .sidebar .nav-link {
       color: #ccc;
@@ -31,7 +43,8 @@
       text-transform: uppercase;
     }
     .menu-list {
-      font-size: 1rem;
+      padding: 0.75rem 0;
+      font-size: 20px;
     }
     .badge-pending {
       background-color: #ffc107;
@@ -100,10 +113,10 @@
 </head>
 <body>
 
-  <!-- Navbar -->
+      <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <a class="navbar-brand fw-bold text-warning ms-4" href="#">Hunian.id</a>
     <div class="container">
-      <a class="navbar-brand fw-bold text-warning" href="#">Hunian.id</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
         <span class="navbar-toggler-icon"></span>
       </button>
@@ -135,24 +148,8 @@
   <div class="container-fluid">
     <div class="row">
       <!-- Sidebar -->
-      <nav class="col-md-2 sidebar d-flex flex-column p-3">
-        <ul class="nav flex-column mb-auto">
-            <li class="nav-item">
-              <a href="propertiku.html" class="nav-link"><i class="bi bi-box-arrow-right me-2 menu-list"></i>Dashboard</a>
-            </li>
-            <li class="mt-4 section-label">Data</li>
-            <li><a href="kelolaproperti.html" class="nav-link"><i class="bi bi-house-door me-2 menu-list"></i>Properti</a></li>
-            <li><a href="kamar.html" class="nav-link"><i class="bi bi-door-closed me-2 menu-list"></i>Kamar</a></li>
-            <li><a href="penyewa.html" class="nav-link"><i class="bi bi-people-fill me-2 menu-list"></i>Penyewa</a></li>
-            <li class="mt-4 section-label">Transaksi</li>
-            <li><a href="#" class="nav-link active"><i class="bi bi-book me-2 menu-list"></i>Pemesanan</a></li>
-            <li><a href="pembayaran.html" class="nav-link"><i class="bi bi-receipt me-2 menu-list"></i>Pembayaran</a></li>
-            <li><a href="pengeluaran.html" class="nav-link"><i class="bi bi-stack me-2 menu-list"></i>Pengeluaran</a></li>
-            <li class="mt-4 section-label">Lainnya</li>
-            <li><a href="keluhan.html" class="nav-link"><i class="bi bi-exclamation-triangle me-2 menu-list"></i>Keluhan</a></li>
-        </ul>
-      </nav>
-
+        <?php $activeMenu = 'pemesanan'; ?> 
+        <?php include __DIR__ . '/../partials/sidebar_propertiku.php'; ?>
       <!-- Main Content -->
       <main class="col-md-10 ms-sm-auto col-lg-10 p-4">
         <div class="card">

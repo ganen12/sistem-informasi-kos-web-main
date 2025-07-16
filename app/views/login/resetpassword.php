@@ -1,3 +1,8 @@
+<?php
+require_once "../../helpers/auth.php";
+require_login();
+?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>

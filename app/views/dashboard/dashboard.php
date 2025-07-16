@@ -46,7 +46,6 @@
   </style>
 </head>
 <body>
-
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
@@ -57,20 +56,20 @@
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
           <li class="nav-item">
-            <a class="nav-link active" href="dashboardutama.html">Beranda</a>
+            <a class="nav-link active" href="dashboardutama.php">Beranda</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Beli.html">Beli</a>
+            <a class="nav-link" href="Beli.php">Beli</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Sewa.html">Sewa</a>
+            <a class="nav-link" href="Sewa.php">Sewa</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Bantuan</a>
           </li>
           <li class="nav-item ms-2">
-            <a class="btn btn-outline-secondary" href="login.html">Login</a>
-            <a class="btn btn-warning ms-2" href="register.html">Daftar</a>
+            <a class="btn btn-outline-secondary" href="login.php">Login</a>
+            <a class="btn btn-warning ms-2" href="register.php">Daftar</a>
           </li>
         </ul>
       </div>
@@ -82,19 +81,19 @@
     <div class="container">
       <h1>Cari Kost, Rumah, atau Kontrakan Mudah!</h1>
       <p class="lead">Temukan properti idealmu atau pasarkan propertimu dengan mudah.</p>
-      <a href="login.html" class="btn btn-warning btn-lg mt-3">Gabung Sekarang</a>
+      <a href="login.php" class="btn btn-warning btn-lg mt-3">Gabung Sekarang</a>
     </div>
   </section>
 
   <!-- Search Form -->
   <section class="bg-light py-4">
     <div class="container">
-      <form class="row g-2">
+      <form class="row g-2" method="GET" action="search.php">
         <div class="col-md-4">
-          <input type="text" class="form-control" placeholder="Cari Lokasi (Contoh: Jakarta)">
+          <input type="text" class="form-control" name="lokasi" placeholder="Cari Lokasi (Contoh: Jakarta)">
         </div>
         <div class="col-md-3">
-          <select class="form-select">
+          <select class="form-select" name="tipe">
             <option value="">Tipe Properti</option>
             <option value="kost">Kost</option>
             <option value="rumah">Rumah</option>
@@ -102,10 +101,10 @@
           </select>
         </div>
         <div class="col-md-3">
-          <input type="text" class="form-control" placeholder="Anggaran Maksimal (Rp)">
+          <input type="text" class="form-control" name="harga" placeholder="Anggaran Maksimal (Rp)">
         </div>
         <div class="col-md-2">
-          <button class="btn btn-dark w-100">Cari</button>
+          <button class="btn btn-dark w-100" type="submit">Cari</button>
         </div>
       </form>
     </div>
@@ -116,33 +115,53 @@
     <div class="container">
       <h3 class="mb-4">Properti Terbaru</h3>
       <div class="row g-3">
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/kost1.jpg" class="card-img-top" alt="Kost">
-            <div class="card-body">
-              <h5 class="card-title">Kost Exclusive Jakarta Selatan</h5>
-              <p class="card-text">Rp 1.500.000 / bulan</p>
+        <?php
+          include "../../../config/database.php";
+
+          // Ambil dari selling_properties
+          $queryJual = "SELECT 'jual' as kategori, selling_property_id AS id, property_name, sale_price as harga, image FROM selling_properties ORDER BY created_at DESC LIMIT 3";
+          $resultJual = mysqli_query($link, $queryJual);
+
+          // Ambil dari rental_properties
+          $querySewa = "SELECT 'sewa' as kategori, rental_property_id AS id, property_name, rental_price as harga, image FROM rental_properties ORDER BY created_at DESC LIMIT 3";
+          $resultSewa = mysqli_query($link, $querySewa);
+
+          // Gabungkan hasil
+          $allProperties = [];
+          while ($row = mysqli_fetch_assoc($resultJual)) $allProperties[] = $row;
+          while ($row = mysqli_fetch_assoc($resultSewa)) $allProperties[] = $row;
+
+          // Sort by newest (optional)
+          usort($allProperties, fn($a, $b) => $b['id'] <=> $a['id']);
+
+          // Tampilkan max 6
+          $count = 0;
+          foreach ($allProperties as $prop):
+            if ($count++ >= 6) break;
+            if (!empty($prop['image'])) {
+                if ($prop['kategori'] == 'jual') {
+                    $imgPath = "../../uploads/jual/" . $prop['image'];
+                } else {
+                    $imgPath = "../../uploads/sewa/" . $prop['image'];
+                }
+            } else {
+                $imgPath = "https://via.placeholder.com/400x220";
+            }
+            $hargaFormatted = "Rp " . number_format($prop['harga'], 0, ',', '.');
+            $labelHarga = $prop['kategori'] == 'jual' ? $hargaFormatted : $hargaFormatted . " / bulan";
+        ?>
+          <div class="col-md-4">
+            <div class="card h-100">
+              <a href="<?= $detailLink ?>" class="text-decoration-none text-dark">
+                <img src="<?= $imgPath ?>" class="card-img-top" alt="<?= htmlspecialchars($prop['property_name']) ?>">
+                <div class="card-body">
+                  <h5 class="card-title"><?= htmlspecialchars($prop['property_name']) ?></h5>
+                  <p class="card-text"><?= $labelHarga ?></p>
+                </div>
+              </a>
             </div>
           </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/rumah1.jpg" class="card-img-top" alt="Rumah">
-            <div class="card-body">
-              <h5 class="card-title">Rumah Murah di Jogja</h5>
-              <p class="card-text">Rp 850.000.000</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/kontrakan1.jpg" class="card-img-top" alt="Kontrakan">
-            <div class="card-body">
-              <h5 class="card-title">Kontrakan Murah Dekat Kampus</h5>
-              <p class="card-text">Rp 800.000 / bulan</p>
-            </div>
-          </div>
-        </div>
+        <?php endforeach; ?>
       </div>
     </div>
   </section>
@@ -177,4 +196,5 @@
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
+
 </html>

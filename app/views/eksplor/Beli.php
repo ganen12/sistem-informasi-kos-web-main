@@ -42,7 +42,7 @@
           <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
           <li class="nav-item"><a class="nav-link active" href="#">Beli</a></li>
           <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
-          <li class="nav-item"><a class="nav-link" href="propertiku.html">Propertiku</a></li>
+          <li class="nav-item"><a class="nav-link" href="../propertiku/propertiku.php">Propertiku</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
           <li class="nav-item dropdown">
             <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
@@ -88,96 +88,56 @@
     </form>
   </div>
 
-  <!-- Properti List -->
-    <section class="container pb-5">
-        <h5 class="mb-3">Menampilkan 1-3 dari total 3 properti</h5>
-        <div class="row g-4">
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="position-relative">
-                        <a href="DetailProperti1.html" class="text-decoration-none text-dark">
-                        <img src="/Asset/rumah1.jpg" class="card-img-top" alt="Properti">
-                        <span class="badge bg-light text-dark position-absolute top-0 start-0 m-2">Rumah</span>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="fw-bold text-warning">Rp 1.500.000.000</h5>
-                        <p class="fw-semibold small text-dark mb-1">Rumah Kebonwaru Tengah Dekat Pusat Kota</p>
-                        <p class="text-muted small mb-2">Batununggal, Bandung</p>
-                        <div class="d-flex text-muted small mb-3">
-                            <div class="me-3"><i class="bi bi-house-door"></i> 3 KT</div>
-                            <div class="me-3"><i class="bi bi-droplet-half"></i> 2 KM</div>
-                            <div class="me-3"><i class="bi bi-bounding-box"></i> 200 m²</div>
-                            <div><i class="bi bi-aspect-ratio"></i> 150 m²</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary text-white rounded-circle me-2 px-2 py-1 small">H</div>
-                                <small class="text-muted">Husni</small>
-                            </div>
-                            <a href="https://wa.me/628123456789" class="btn btn-success btn-sm">
-                            <i class="bi bi-whatsapp"></i> Chat
-                            </a>
-                        </div>
-                    </div>
-                </div>
+  <?php
+  include "../../../config/database.php";
+
+  $query = "SELECT s.*, u.nama_lengkap FROM selling_properties s JOIN users u ON s.user_id = u.id ORDER BY created_at DESC";
+  $result = mysqli_query($link, $query);
+  ?>
+
+  <section class="container pb-5">
+    <h5 class="mb-3">Menampilkan <?= mysqli_num_rows($result) ?> properti</h5>
+    <div class="row g-4">
+      <?php while($row = mysqli_fetch_assoc($result)): 
+        $harga = number_format($row['sale_price'], 0, ',', '.');
+        $imgPath = !empty($row['image']) ? "../../uploads/jual/{$row['image']}" : "https://via.placeholder.com/400x220";
+        $waUrl = "https://wa.me/" . preg_replace('/[^0-9]/', '', $row['phone_number'] ?? '628123456789');
+        $inisial = strtoupper(substr($row['nama_lengkap'], 0, 1));
+      ?>
+      <div class="col-md-4">
+        <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+          <div class="position-relative">
+            <a href="../detail_properti.php?kategori=jual&id=<?= $row['selling_property_id'] ?>" class="text-decoration-none text-dark">
+              <img src="<?= $imgPath ?>" class="card-img-top" alt="<?= htmlspecialchars($row['property_name']) ?>">
+              <span class="badge bg-light text-dark position-absolute top-0 start-0 m-2">Rumah</span>
+          </div>
+          <div class="card-body">
+            <h5 class="fw-bold text-warning">Rp <?= $harga ?></h5>
+            <p class="fw-semibold small text-dark mb-1"><?= htmlspecialchars($row['property_name']) ?></p>
+            <p class="text-muted small mb-2">-</p> <!-- Lokasi belum tersedia di tabel -->
+            <div class="d-flex text-muted small mb-3">
+              <div class="me-3"><i class="bi bi-house-door"></i> <?= $row['bedrooms'] ?> KT</div>
+              <div class="me-3"><i class="bi bi-droplet-half"></i> <?= $row['bathrooms'] ?> KM</div>
+              <div class="me-3"><i class="bi bi-bounding-box"></i> <?= $row['land_area_size'] ?> m²</div>
+              <div><i class="bi bi-aspect-ratio"></i> <?= $row['building_area_size'] ?> m²</div>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="position-relative">
-                        <img src="/Asset/rumah2.jpg" class="card-img-top" alt="Properti">
-                        <span class="badge bg-light text-dark position-absolute top-0 start-0 m-2">Rumah</span>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="fw-bold text-warning">Rp 950.000.000</h5>
-                        <p class="fw-semibold small text-dark mb-1">Rumah Kebonwaru Tengah Dekat Pusat Kota</p>
-                        <p class="text-muted small mb-2">Batununggal, Bandung</p>
-                        <div class="d-flex text-muted small mb-3">
-                            <div class="me-3"><i class="bi bi-house-door"></i> 2 KT</div>
-                            <div class="me-3"><i class="bi bi-droplet-half"></i> 1 KM</div>
-                            <div class="me-3"><i class="bi bi-bounding-box"></i> 150 m²</div>
-                            <div><i class="bi bi-aspect-ratio"></i> 100 m²</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary text-white rounded-circle me-2 px-2 py-1 small">A</div>
-                                <small class="text-muted">Alif</small>
-                            </div>
-                            <a href="https://wa.me/628123456789" class="btn btn-success btn-sm">
-                            <i class="bi bi-whatsapp"></i> Chat
-                            </a>
-                        </div>
-                    </div>
-                </div>
+            <div class="d-flex justify-content-between align-items-center border-top pt-2">
+              <div class="d-flex align-items-center">
+                <div class="bg-secondary text-white rounded-circle me-2 px-2 py-1 small"><?= $inisial ?></div>
+                <small class="text-muted"><?= htmlspecialchars($row['nama_lengkap']) ?></small>
+              </div>
+              <a href="<?= $waUrl ?>" class="btn btn-success btn-sm">
+                <i class="bi bi-whatsapp"></i> Chat
+              </a>
             </div>
-            <div class="col-md-4">
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
-                    <div class="position-relative">
-                        <img src="/Asset/rumah1.jpg" class="card-img-top" alt="Properti">
-                        <span class="badge bg-light text-dark position-absolute top-0 start-0 m-2">Rumah</span>
-                    </div>
-                    <div class="card-body">
-                        <h5 class="fw-bold text-warning">Rp 4.000.000 Miliar</h5>
-                        <p class="fw-semibold small text-dark mb-1">Rumah Kebonwaru Tengah Dekat Pusat Kota</p>
-                        <p class="text-muted small mb-2">Batununggal, Bandung</p>
-                        <div class="d-flex text-muted small mb-3">
-                            <div class="me-3"><i class="bi bi-house-door"></i> 5 KT</div>
-                            <div class="me-3"><i class="bi bi-droplet-half"></i> 3 KM</div>
-                            <div class="me-3"><i class="bi bi-bounding-box"></i> 263 m²</div>
-                            <div><i class="bi bi-aspect-ratio"></i> 200 m²</div>
-                        </div>
-                        <div class="d-flex justify-content-between align-items-center border-top pt-2">
-                            <div class="d-flex align-items-center">
-                                <div class="bg-secondary text-white rounded-circle me-2 px-2 py-1 small">G</div>
-                                <small class="text-muted">Ganen</small>
-                            </div>
-                            <a href="https://wa.me/628123456789" class="btn btn-success btn-sm">
-                            <i class="bi bi-whatsapp"></i> Chat
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
+          </div>
+          </a>
         </div>
+      </div>
+      <?php endwhile; ?>
+    </div>
+  </section>
+
 
         <!-- Pagination -->
         <div class="mt-4 d-flex justify-content-center">

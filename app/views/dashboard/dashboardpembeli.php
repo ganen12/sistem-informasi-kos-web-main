@@ -1,3 +1,9 @@
+        <!-- jika user belum login, redirect ke halaman login -->
+    <?php
+    require_once "../../helpers/auth.php";
+    require_login();
+    ?>
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -46,6 +52,8 @@
   </style>
 </head>
 <body>
+
+
 
   <!-- Navbar -->
   <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">

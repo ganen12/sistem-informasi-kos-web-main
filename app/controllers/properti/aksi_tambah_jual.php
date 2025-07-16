@@ -21,11 +21,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $property_condition = $_POST['property_condition'] ?? '';
     $description = $_POST['description'] ?? '';
     $facilities = $_POST['facilities'] ?? '';
+    $location = $_POST['location'] ?? '';
 
     // Upload gambar
     $image_name = '';
     if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-        $target_dir = "../../uploads/jual";
+        $target_dir = "../../uploads/jual/";
         $image_name = time() . "_" . basename($_FILES["image"]["name"]);
         move_uploaded_file($_FILES["image"]["tmp_name"], $target_dir . $image_name);
     }
@@ -38,9 +39,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Insert ke database
     $query = "INSERT INTO selling_properties 
-    (user_id, property_name, sale_price, price_per_month, image, bedrooms, bathrooms, land_area_size, building_area_size, certificate_type, electricity_power, floors, garage, property_condition, description, facilities, created_at, updated_at) 
+    (user_id, property_name, sale_price, price_per_month, image, bedrooms, bathrooms, land_area_size, building_area_size, certificate_type, electricity_power, floors, garage, property_condition, description, facilities, location, created_at, updated_at) 
     VALUES 
-    ('$user_id', '$property_name', '$sale_price', '$price_per_month', '$image_name', '$bedrooms', '$bathrooms', '$land_area_size', '$building_area_size', '$certificate_type', '$electricity_power', '$floors', '$garage', '$property_condition', '$description', '$facilities', NOW(), NOW())";
+    ('$user_id', '$property_name', '$sale_price', '$price_per_month', '$image_name', '$bedrooms', '$bathrooms', '$land_area_size', '$building_area_size', '$certificate_type', '$electricity_power', '$floors', '$garage', '$property_condition', '$description', '$facilities', $location, NOW(), NOW())";
 
     mysqli_query($link, $query) or die(mysqli_error($link));
     header("Location: ../../views/propertiku/kelolaproperti.php?success=jual");

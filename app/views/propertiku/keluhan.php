@@ -1,3 +1,8 @@
+<?php
+require_once "../../helpers/auth.php";
+require_login();
+?>
+
 <!doctype html>
 <html lang="en">
 <head>
@@ -9,13 +14,20 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@100;200;300;400;500;600;700&display=swap" rel="stylesheet">
   <style>
     body {
-      background-color: #E4E4E4;
       font-family: 'Montserrat', sans-serif;
+      background-color: #e4e4e4;
     }
+
     .sidebar {
-      height: 100vh;
-      background-color: #252321;
-      color: white;
+        position: fixed;
+        top: 0;
+        left: 0;
+        height: 100vh;
+        background-color: #252321;
+        color: white;
+        z-index: 1030; /* agar di atas konten lain */
+        overflow-y: auto;
+        margin-top: 56px;
     }
     .sidebar .nav-link {
       color: #ccc;
@@ -25,6 +37,11 @@
       background-color: #32302D;
       color: white;
     }
+    .section-label {
+      color: rgba(238, 237, 235, 0.3);
+      font-size: 12px;
+      text-transform: uppercase;
+    }
     .brand {
       background-color: #cfc6b4;
     }
@@ -32,54 +49,53 @@
       padding: 0.75rem 0;
       font-size: 20px;
     }
-    .section-label {
-        color: rgba(238, 237, 235, 0.30);
-
-        font-family: Montserrat;
-        font-style: normal;
-        font-weight: 200;
-        line-height: normal;
-        letter-spacing: 1.2px;
-    }
     .input-fields {
         width: 700px;
     }
   </style>
 </head>
 <body>
+      <!-- Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <a class="navbar-brand fw-bold text-warning ms-4" href="#">Hunian.id</a>
+    <div class="container">
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarNav">
+        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
+          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
+          <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
+          <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
+          <li class="nav-item dropdown">
+            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
+              <i class="bi bi-person-circle me-2"></i> Seller
+            </a>
+            <ul class="dropdown-menu dropdown-menu-end">
+              <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
+              <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
+              <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
+            </ul>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+
 <div class="container-fluid">
   <div class="row">
     <!-- Sidebar -->
-    <nav class="col-md-2 sidebar d-flex flex-column p-3">
-      <div class="mb-4">
-        <h5><i class="bi bi-house-door-fill me-2"></i>Kos Husni</h5>
-      </div>
-      <ul class="nav flex-column mb-auto">
-        <li><a href="index.html" class="nav-link"><i class="bi bi-house-door me-2 menu-list"></i>Dashboard</a></li>
-        <li class="mt-4 text-uppercase small section-label">Data</li>
-        <li><a href="kamar.html" class="nav-link"><i class="bi bi-door-closed me-2 menu-list"></i>Kamar</a></li>
-        <li><a href="penyewa.html" class="nav-link"><i class="bi bi-people-fill me-2 menu-list"></i>Penyewa</a></li>
-        <li class="mt-4 text-uppercase small section-label">Transaksi</li>
-        <li><a href="pembayaran.html" class="nav-link"><i class="bi bi-receipt me-2 menu-list"></i>Pembayaran</a></li>
-        <li><a href="pengeluaran.html" class="nav-link"><i class="bi bi-stack me-2 menu-list"></i>Pengeluaran</a></li>
-        <li class="mt-4 text-uppercase small section-label">Lainnya</li>
-        <li><a href="keluhan.html" class="nav-link active"><i class="bi bi-exclamation-triangle me-2 menu-list"></i>Keluhan</a></li>
-      </ul>
-      <div class="mt-auto">
-        <ul class="nav flex-column mb-auto">
-            <li class="">
-                <a href="#" class="nav-link text-danger" data-bs-toggle="modal" data-bs-target="#logoutModal">
-                    <i class="bi bi-box-arrow-right me-2 menu-list"></i>Logout
-                </a>
-            </li>
-        </ul>
-      </div>
-    </nav>
+    <?php $activeMenu = 'keluhan'; ?> 
+    <?php include __DIR__ . '/../partials/sidebar_propertiku.php'; ?>
 
     <!-- Main -->
     <main class="col-md-10 ms-sm-auto col-lg-10" style="padding: 0;">
       <!-- Top Navbar -->
-      <div class="d-flex justify-content-between align-items-center py-3 brand px-4">
+      <!-- <div class="d-flex justify-content-between align-items-center py-3 brand px-4">
         <div class="h5 mb-0">Keluhan</div>
         <div class="d-flex align-items-center gap-3">
           <div class="dropdown-center">
@@ -92,7 +108,7 @@
           </div>
           <div><i class="bi bi-person-circle me-1"></i> sadmin</div>
         </div>
-      </div>
+      </div> -->
 
       <div class="container-fluid mt-4">
         <div class="card p-4">

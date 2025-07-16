@@ -1,4 +1,4 @@
-d<?php
+<?php
 $errors = array();
 
 if (empty($_POST['loginEmail'])) {
@@ -31,10 +31,13 @@ if (count($errors) == 0) {
     if (mysqli_num_rows($result) == 1) {
         // Login berhasil
         session_start(); // mulai session (cookie)
-        $_SESSION['status'] = 'Login'; // key value simpel: status=login
-        $_SESSION['user_id'] = mysqli_fetch_assoc($result)['id']; // ambil id user dari hasil query
-        $_SESSION['username'] = $username; // simpan username ke session
-        $_SESSION['role'] = $role; // simpan role ke session
+        $user = mysqli_fetch_assoc($result); 
+
+        $_SESSION['status'] = 'Login';
+        $_SESSION['user_id'] = $user['id'];
+        $_SESSION['nama_lengkap'] = $user['nama_lengkap']; 
+        $_SESSION['email'] = $user['email'];
+        $_SESSION['role'] = $user['role'];
 
                                     // contoh lain seperti durasi session ...
 
