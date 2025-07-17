@@ -3,6 +3,12 @@ require_once "../../helpers/auth.php";
 require_login();
 ?>
 
+<?php
+    include "../../../config/database.php";
+
+    $user_id = $_SESSION['user_id'] ?? 0;
+?>
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -122,9 +128,9 @@ require_login();
       </button>
       <div class="collapse navbar-collapse" id="navbarNav">
         <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
+          <li class="nav-item"><a class="nav-link" href="../dashboard/dashboardpemilik.php">Beranda</a></li>
+          <li class="nav-item"><a class="nav-link" href="../eksplor/Beli.php">Beli</a></li>
+          <li class="nav-item"><a class="nav-link" href="../eksplor/Sewa.php">Sewa</a></li>
           <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
           <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
           <li class="nav-item dropdown">
@@ -169,10 +175,11 @@ require_login();
           </div>
           
           <div class="card-body">
+            <!-- Ganti bagian tabel dengan ini -->
             <div class="table-responsive">
-              <table class="table table-hover">
+            <table class="table table-hover">
                 <thead class="table-light">
-                  <tr>
+                <tr>
                     <th>ID Transaksi</th>
                     <th>Tanggal Pendaftaran</th>
                     <th>Durasi Sewa</th>
@@ -182,131 +189,114 @@ require_login();
                     <th>Total Pembayaran</th>
                     <th>Status</th>
                     <th>Aksi</th>
-                  </tr>
+                </tr>
                 </thead>
                 <tbody>
-                  <tr id="trx-001" class="highlight-row">
-                    <td>TRX-001</td>
-                    <td>10 Juni 2025</td>
-                    <td>12 Bulan</td>
-                    <td>Budi Santoso</td>
-                    <td>A-101</td>
-                    <td>Rp 2.500.000</td>
-                    <td>Rp 30.000.000</td>
-                    <td><span class="badge bg-success">Lunas</span></td>
-                    <td class="action-buttons">
-                      <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#detailPemesananModal">
-                        <i class="bi bi-eye"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning me-1" data-bs-toggle="modal" data-bs-target="#editPemesananModal">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#perpanjangModal">
-                        <i class="bi bi-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr id="trx-002">
-                    <td>TRX-002</td>
-                    <td>5 Juni 2025</td>
-                    <td>6 Bulan</td>
-                    <td>Anita Rahayu</td>
-                    <td>B-205</td>
-                    <td>Rp 2.200.000</td>
-                    <td>Rp 13.200.000</td>
-                    <td><span class="badge bg-warning badge-pending">Belum Lunas</span></td>
-                    <td class="action-buttons">
-                      <button class="btn btn-sm btn-outline-primary me-1">
-                        <i class="bi bi-eye"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning me-1">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info me-1">
-                        <i class="bi bi-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr id="trx-003">
-                    <td>TRX-003</td>
-                    <td>1 Juni 2025</td>
-                    <td>3 Bulan</td>
-                    <td>Rudi Hermawan</td>
-                    <td>C-301</td>
-                    <td>Rp 1.800.000</td>
-                    <td>Rp 5.400.000</td>
-                    <td><span class="badge bg-danger badge-overdue">Belum Bayar</span></td>
-                    <td class="action-buttons">
-                      <button class="btn btn-sm btn-outline-primary me-1">
-                        <i class="bi bi-eye"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning me-1">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info me-1">
-                        <i class="bi bi-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr id="trx-004">
-                    <td>TRX-004</td>
-                    <td>28 Mei 2025</td>
-                    <td>12 Bulan</td>
-                    <td>Dewi Susanti</td>
-                    <td>A-105</td>
-                    <td>Rp 2.500.000</td>
-                    <td>Rp 30.000.000</td>
-                    <td><span class="badge bg-success">Lunas</span></td>
-                    <td class="action-buttons">
-                      <button class="btn btn-sm btn-outline-primary me-1">
-                        <i class="bi bi-eye"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning me-1">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info me-1">
-                        <i class="bi bi-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
-                  <tr id="trx-005">
-                    <td>TRX-005</td>
-                    <td>25 Mei 2025</td>
-                    <td>6 Bulan</td>
-                    <td>Fajar Setiawan</td>
-                    <td>B-212</td>
-                    <td>Rp 2.300.000</td>
-                    <td>Rp 13.800.000</td>
-                    <td><span class="badge bg-success">Lunas</span></td>
-                    <td class="action-buttons">
-                      <button class="btn btn-sm btn-outline-primary me-1">
-                        <i class="bi bi-eye"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-warning me-1">
-                        <i class="bi bi-pencil"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-info me-1">
-                        <i class="bi bi-calendar-plus"></i>
-                      </button>
-                      <button class="btn btn-sm btn-outline-danger">
-                        <i class="bi bi-trash"></i>
-                      </button>
-                    </td>
-                  </tr>
+                <?php
+                // Query untuk mendapatkan data pemesanan
+                $query = "SELECT 
+                            rt.room_transaction_id,
+                            rt.registration_date,
+                            rt.rental_duration,
+                            rt.status,
+                            t.name AS tenant_name,
+                            r.room_no,
+                            r.price_per_month,
+                            p.status AS payment_status
+                            FROM room_transactions rt
+                            JOIN tenants t ON rt.tenant_id = t.tenant_id
+                            JOIN rooms r ON rt.room_no = r.room_no
+                            JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+                            LEFT JOIN payments p ON rt.payment_id = p.payment_id
+                            WHERE rp.user_id = ?
+                            ORDER BY rt.registration_date DESC";
+                
+                $stmt = mysqli_prepare($link, $query);
+                mysqli_stmt_bind_param($stmt, "i", $user_id);
+                mysqli_stmt_execute($stmt);
+                $result = mysqli_stmt_get_result($stmt);
+                
+                if (mysqli_num_rows($result) > 0) {
+                    while ($row = mysqli_fetch_assoc($result)) {
+                        // Hitung total pembayaran
+                        $duration = (int) filter_var($row['rental_duration'], FILTER_SANITIZE_NUMBER_INT);
+                        $total_payment = $row['price_per_month'] * $duration;
+                        
+                        // Tentukan kelas badge berdasarkan status
+                        $status_class = 'bg-warning text-dark';
+                        $status_text = 'Belum Lunas'; // Default
+                        if (isset($row['status'])) {
+                            $status_text = $row['status'];
+                            switch ($row['status']) {
+                                case 'Lunas':
+                                    $status_class = 'bg-success';
+                                    break;
+                                case 'Belum Lunas':
+                                    $status_class = 'bg-warning text-dark';
+                                    break;
+                                case 'Belum Bayar':
+                                    $status_class = 'bg-danger';
+                                    break;
+                            }
+                        }
+                        ?>
+                        <tr>
+                            <td>TRX-<?= str_pad($row['room_transaction_id'], 4, '0', STR_PAD_LEFT) ?></td>
+                            <td><?= date('d M Y', strtotime($row['registration_date'])) ?></td>
+                            <td><?= htmlspecialchars($row['rental_duration']) ?></td>
+                            <td><?= htmlspecialchars($row['tenant_name']) ?></td>
+                            <td><?= htmlspecialchars($row['room_no']) ?></td>
+                            <td>Rp <?= number_format($row['price_per_month'], 0, ',', '.') ?></td>
+                            <td>Rp <?= number_format($total_payment, 0, ',', '.') ?></td>
+                            <td><span class="badge <?= $status_class ?>"><?= $status_text ?></span></td>
+                            <td class="action-buttons">
+                                <button class="btn btn-sm btn-outline-primary me-1" data-bs-toggle="modal" data-bs-target="#detailPemesananModal<?php echo $row['room_transaction_id']; ?>" 
+                                    onclick="showDetailModal(
+                                        'TRX-<?= str_pad($row['room_transaction_id'], 4, '0', STR_PAD_LEFT) ?>',
+                                        '<?= date('d M Y', strtotime($row['registration_date'])) ?>',
+                                        '<?= htmlspecialchars($row['rental_duration']) ?>',
+                                        '<?= htmlspecialchars($row['tenant_name']) ?>',
+                                        '<?= htmlspecialchars($row['room_no']) ?>',
+                                        'Rp <?= number_format($row['price_per_month'], 0, ',', '.') ?>',
+                                        'Rp <?= number_format($total_payment, 0, ',', '.') ?>',
+                                        '<?= $status_text ?>',
+                                        '<?= $status_class ?>'
+                                    )">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <a href="pemesanan.php?edit=<?= $row['room_transaction_id'] ?>" class="btn btn-sm btn-outline-warning me-1">
+                                    <i class="bi bi-pencil"></i>
+                                </a>
+                                <button class="btn btn-sm btn-outline-info me-1" data-bs-toggle="modal" data-bs-target="#perpanjangModal"
+                                    onclick="prepareExtension(
+                                        <?= $row['room_transaction_id'] ?>,
+                                        '<?= htmlspecialchars($row['tenant_name']) ?>',
+                                        '<?= htmlspecialchars($row['room_no']) ?>',
+                                        '<?= htmlspecialchars($row['rental_duration']) ?>',
+                                        <?= $row['price_per_month'] ?>,
+                                        '<?= date('Y-m-d', strtotime($row['registration_date'] . ' + ' . $duration . ' months')) ?>'
+                                    )">
+                                    <i class="bi bi-calendar-plus"></i>
+                                </button>
+                                <a href="../../controllers/pemesanan/aksi_hapus_pemesanan.php?id=<?= $row['room_transaction_id'] ?>" 
+                                    class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Yakin hapus pemesanan ini?');">
+                                    <i class="bi bi-trash"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        <?php
+                    }
+                } else {
+                    ?>
+                    <tr>
+                        <td colspan="9" class="text-center text-muted">Belum ada data pemesanan.</td>
+                    </tr>
+                    <?php
+                }
+                ?>
                 </tbody>
-              </table>
+            </table>
             </div>
             
             <!-- Pagination -->
@@ -329,99 +319,208 @@ require_login();
     </div>
   </div>
 
-  <!-- Modal Tambah Pemesanan -->
-  <div class="modal fade" id="tambahPemesananModal" tabindex="-1" aria-labelledby="tambahPemesananModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
-      <div class="modal-content">
+<!-- Modal Tambah Pemesanan -->
+<div class="modal fade" id="tambahPemesananModal" tabindex="-1" aria-labelledby="tambahPemesananModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <form action="../../controllers/pemesanan/aksi_tambah_pemesanan.php" method="POST">
         <div class="modal-header">
           <h5 class="modal-title" id="tambahPemesananModalLabel">Tambah Pemesanan Baru</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Tutup"></button>
         </div>
+
         <div class="modal-body">
-          <form>
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="tanggalPendaftaran" class="form-label">Tanggal Pendaftaran</label>
-                <input type="date" class="form-control" id="tanggalPendaftaran" value="2025-06-10">
-              </div>
-              <div class="col-md-6">
-                <label for="durasiSewa" class="form-label">Durasi Sewa</label>
-                <select class="form-select" id="durasiSewa">
-                  <option value="1">1 Bulan</option>
-                  <option value="3">3 Bulan</option>
-                  <option value="6" selected>6 Bulan</option>
-                  <option value="12">12 Bulan</option>
-                </select>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="tanggalPendaftaran" class="form-label">Tanggal Pendaftaran</label>
+              <input type="date" class="form-control" id="tanggalPendaftaran" name="registration_date" required>
+            </div>
+            <div class="col-md-6">
+              <label for="durasiSewa" class="form-label">Durasi Sewa</label>
+              <select class="form-select" id="durasiSewa" name="rental_duration" required>
+                <option value="1 Bulan">1 Bulan</option>
+                <option value="3 Bulan">3 Bulan</option>
+                <option value="6 Bulan" selected>6 Bulan</option>
+                <option value="12 Bulan">12 Bulan</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label for="tenant" class="form-label">Pilih Penyewa</label>
+              <select class="form-select" id="tenant" name="tenant_id" required>
+                <?php
+                $queryTenants = "SELECT tenant_id, name FROM tenants WHERE user_id = $user_id";
+                $tenants = mysqli_query($link, $queryTenants); ?>
+                <?php while ($row = mysqli_fetch_assoc($tenants)): ?>
+                    <option value='<?= $row['tenant_id'] ?>'><?= htmlspecialchars($row['name']) ?></option>
+                <?php endwhile; ?>
+                
+              </select>
+            </div>
+          </div>
+
+            <div class="col-md-6">
+              <label for="kamar" class="form-label">Pilih Kamar Tersedia</label>
+              <select class="form-select" id="kamar" name="room_no" required>
+                <?php
+                $queryRooms = "SELECT room_no, price_per_month FROM rooms 
+                            INNER JOIN rental_properties ON rooms.rental_property_id = rental_properties.rental_property_id
+                            WHERE rental_properties.user_id = 1 AND status = 'Tersedia'";
+                $rooms = mysqli_query($link, $queryRooms); ?>
+                <?php while ($row = mysqli_fetch_assoc($rooms)): 
+                    $harga = number_format($r['price_per_month'], 0, ',', '.'); ?>
+                    <option value="<?= htmlspecialchars($row['room_no']) ?>" data-harga="<?= $row['price_per_month'] ?>"><?= htmlspecialchars($row['room_no']) ?> (Rp <?= htmlspecialchars($row['price_per_month']) ?>/bulan)</option>
+                <?php endwhile; ?>
+
+              </select>
+            </div>
+          </div>
+
+          <div class="row mb-3">
+            <div class="col-md-6">
+              <label class="form-label">Harga per Bulan</label>
+              <div class="input-group">
+                <span class="input-group-text"></span>
+                <input value="<?= htmlspecialchars($row['price_per_month']) ?>" type="text" class="form-control" id="hargaPerBulan" disabled readonly>
               </div>
             </div>
-            
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="pilihPenyewa" class="form-label">Pilih Penyewa</label>
-                <select class="form-select" id="pilihPenyewa">
-                  <option value="">-- Pilih Penyewa --</option>
-                  <option value="1">Budi Santoso</option>
-                  <option value="2">Anita Rahayu</option>
-                  <option value="3">Rudi Hermawan</option>
-                  <option value="4">Dewi Susanti</option>
-                  <option value="5">Fajar Setiawan</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label for="pilihKamar" class="form-label">Pilih Kamar</label>
-                <select class="form-select" id="pilihKamar">
-                  <option value="">-- Pilih Kamar --</option>
-                  <option value="A-101">A-101 (Rp 2.500.000/bulan)</option>
-                  <option value="A-102">A-102 (Rp 2.500.000/bulan)</option>
-                  <option value="B-205">B-205 (Rp 2.200.000/bulan)</option>
-                  <option value="C-301">C-301 (Rp 1.800.000/bulan)</option>
-                  <option value="A-105">A-105 (Rp 2.500.000/bulan)</option>
-                </select>
+            <div class="col-md-6">
+              <label class="form-label">Total Estimasi Pembayaran</label>
+              <div class="input-group">
+                <span class="input-group-text">Rp</span>
+                <input type="text" class="form-control" id="totalPembayaran" name="totalPembayaran" readonly>
               </div>
             </div>
-            
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="hargaPerBulan" class="form-label">Harga per Bulan</label>
-                <div class="input-group">
-                  <span class="input-group-text">Rp</span>
-                  <input type="text" class="form-control" id="hargaPerBulan" value="2,500,000" readonly>
-                </div>
-              </div>
-              <div class="col-md-6">
-                <label for="totalPembayaran" class="form-label">Total Pembayaran</label>
-                <div class="input-group">
-                  <span class="input-group-text">Rp</span>
-                  <input type="text" class="form-control" id="totalPembayaran" value="15,000,000" readonly>
-                </div>
-              </div>
+          </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+                <button type="submit" class="btn btn-primary">Simpan Pemesanan</button>
             </div>
-            
-            <div class="row mb-3">
-              <div class="col-md-6">
-                <label for="statusPembayaran" class="form-label">Status Pembayaran</label>
-                <select class="form-select" id="statusPembayaran">
-                  <option value="Lunas">Lunas</option>
-                  <option value="Belum Lunas">Belum Lunas</option>
-                  <option value="Belum Bayar" selected>Belum Bayar</option>
-                </select>
-              </div>
-              <div class="col-md-6">
-                <label for="tanggalJatuhTempo" class="form-label">Tanggal Jatuh Tempo</label>
-                <input type="date" class="form-control" id="tanggalJatuhTempo" value="2025-07-10">
-              </div>
+        </div> <!-- end modal-body -->
+
+
+      </form>
+    </div>
+  </div>
+</div>
+
+<?php
+$query2 = mysqli_query($conn, "
+    SELECT rt.*, t.*, r.price_per_month, r.room_no, rp.property_name, rp.location
+    FROM room_transactions rt
+    JOIN tenants t ON rt.tenant_id = t.tenant_id
+    JOIN rooms r ON rt.room_no = r.room_no
+    JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+");
+
+while ($row = mysqli_fetch_assoc($query2)) {
+  $id = $row['room_transaction_id'];
+  
+  // Ekstrak angka dari rental_duration
+  preg_match('/\d+/', $row['rental_duration'], $matches);
+  $durasi_bulan = isset($matches[0]) ? (int)$matches[0] : 0;
+
+  // Hitung total harga
+  $total = $row['price_per_month'] * $durasi_bulan;
+
+    // Tentukan kelas badge berdasarkan status
+    $status_class_detail = 'bg-warning text-dark';
+    $status_text_detail = 'Belum Lunas'; // Default
+    if (isset($row['status'])) {
+        $status_text_detail = $row['status'];
+        switch ($row['status']) {
+            case 'Lunas':
+                $status_class_detail = 'bg-success';
+                break;
+            case 'Belum Lunas':
+                $status_class_detail = 'bg-warning text-dark';
+                break;
+            case 'Belum Bayar':
+                $status_class_detail = 'bg-danger';
+                break;
+        }
+    }
+?>
+<!-- Modal Detail Pemesanan -->
+<div class="modal fade" id="detailPemesananModal<?php echo $id; ?>" tabindex="-1" aria-labelledby="detailPemesananModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Detail Pemesanan</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <div class="row mb-4">
+          <div class="col-md-8">
+            <h6>Informasi Pemesanan</h6>
+            <div class="row mb-2"><div class="col-md-4 fw-medium">ID Transaksi:</div><div class="col-md-8">TRX-<?php echo $id; ?></div></div>
+            <div class="row mb-2"><div class="col-md-4 fw-medium">Tanggal Pendaftaran:</div><div class="col-md-8"><?php echo $row['registration_date']; ?></div></div>
+            <div class="row mb-2"><div class="col-md-4 fw-medium">Durasi Sewa:</div><div class="col-md-8"><?php echo $row['rental_duration']; ?></div></div>
+            <div class="row mb-2"><div class="col-md-4 fw-medium">Status:</div>
+              <div class="col-md-8"><span class="badge <?= $status_class_detail ?>"><?php echo $status_text_detail ?></span></div>
             </div>
-          </form>
+          </div>
+
+          <div class="col-md-4">
+            <h6>Pembayaran</h6>
+            <div class="row mb-2"><div class="col-md-6 fw-medium">Harga/Bulan:</div><div class="col-md-6">Rp <?php echo number_format($row['price_per_month'], 0, ',', '.'); ?></div></div>
+            <div class="row mb-2"><div class="col-md-6 fw-medium">Total:</div><div class="col-md-6">Rp <?php echo number_format($total, 0, ',', '.'); ?></div></div>
+          </div>
         </div>
-        <div class="modal-footer">
-          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-          <button type="button" class="btn btn-primary">Simpan Pemesanan</button>
+
+        <div class="row">
+          <div class="col-md-6">
+            <h6>Data Penyewa</h6>
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-light rounded-circle p-3 me-3"><i class="bi bi-person fs-4"></i></div>
+                  <div>
+                    <h5 class="mb-0"><?php echo $row['name']; ?></h5>
+                    <p class="text-muted mb-0">ID: TN-<?php echo $row['tenant_id']; ?></p>
+                  </div>
+                </div>
+                <div class="mb-2"><i class="bi bi-envelope me-2"></i> <?php echo $row['email']; ?></div>
+                <div class="mb-2"><i class="bi bi-telephone me-2"></i> <?php echo $row['phone_number']; ?></div>
+                <div><i class="bi bi-geo-alt me-2"></i> <?php echo $row['address']; ?></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <h6>Detail Kamar</h6>
+            <div class="card">
+              <div class="card-body">
+                <div class="d-flex align-items-center mb-3">
+                  <div class="bg-light rounded-circle p-3 me-3"><i class="bi bi-door-closed fs-4"></i></div>
+                  <div>
+                    <h5 class="mb-0"><?php echo $row['room_no']; ?></h5>
+                    <p class="text-muted mb-0">Tipe: Standar</p>
+                  </div>
+                </div>
+                <div class="mb-2"><i class="bi bi-house me-2"></i> <?php echo $row['property_name']; ?></div>
+                <div class="mb-2"><i class="bi bi-geo-alt me-2"></i> <?php echo $row['location']; ?></div>
+                <div><i class="bi bi-tag me-2"></i> Rp <?php echo number_format($row['price_per_month'], 0, ',', '.'); ?>/bulan</div>
+              </div>
+            </div>
+          </div>
         </div>
+
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
+        <button type="button" class="btn btn-outline-primary">Cetak Bukti</button>
       </div>
     </div>
   </div>
+</div>
+<?php } ?>
 
-  <!-- Modal Detail Pemesanan -->
+
+  <!-- Modal Detail Pemesanan
   <div class="modal fade" id="detailPemesananModal" tabindex="-1" aria-labelledby="detailPemesananModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
       <div class="modal-content">
@@ -525,65 +624,16 @@ require_login();
             </div>
           </div>
           
-          <!-- Form Perpanjangan Sewa -->
-          <div class="extension-form mt-4">
-            <h5>Perpanjangan Sewa</h5>
-            <p class="text-muted">Tambahkan durasi sewa untuk penyewa ini</p>
-            
-            <div class="row">
-              <div class="col-md-8">
-                <div class="mb-3">
-                  <label for="tambahDurasi" class="form-label">Tambahan Durasi Sewa</label>
-                  <select class="form-select" id="tambahDurasi">
-                    <option value="1">1 Bulan</option>
-                    <option value="3">3 Bulan</option>
-                    <option value="6" selected>6 Bulan</option>
-                    <option value="12">12 Bulan</option>
-                  </select>
-                </div>
-                
-                <div class="mb-3">
-                  <label for="tanggalMulaiPerpanjangan" class="form-label">Tanggal Mulai Perpanjangan</label>
-                  <input type="date" class="form-control" id="tanggalMulaiPerpanjangan" value="2025-06-10">
-                </div>
-              </div>
-              
-              <div class="col-md-4">
-                <div class="summary-card">
-                  <h6>Ringkasan Perpanjangan</h6>
-                  <div class="d-flex justify-content-between mb-2">
-                    <span>Harga per Bulan:</span>
-                    <span class="summary-value">Rp 2.500.000</span>
-                  </div>
-                  <div class="d-flex justify-content-between mb-2">
-                    <span>Durasi Tambahan:</span>
-                    <span class="summary-value">6 Bulan</span>
-                  </div>
-                  <hr>
-                  <div class="d-flex justify-content-between mb-2">
-                    <span class="fw-medium">Total Pembayaran:</span>
-                    <span class="summary-value fw-bold">Rp 15.000.000</span>
-                  </div>
-                  <div class="d-flex justify-content-between">
-                    <span>Tanggal Berakhir Baru:</span>
-                    <span class="summary-value">10 Des 2025</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-            
-            <button class="btn btn-extension w-100 mt-3">
-              <i class="bi bi-calendar-plus me-2"></i> Proses Perpanjangan Sewa
-            </button>
           </div>
-        </div>
         <div class="modal-footer">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Tutup</button>
           <button type="button" class="btn btn-outline-primary">Cetak Bukti</button>
         </div>
+        </div>
+
       </div>
     </div>
-  </div>
+  </div> -->
 
   <!-- Modal Perpanjang Sewa -->
   <div class="modal fade" id="perpanjangModal" tabindex="-1" aria-labelledby="perpanjangModalLabel" aria-hidden="true">
@@ -659,7 +709,7 @@ require_login();
   </div>    
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-<script>
+<!-- <script>
   // Logout confirmation
   document.getElementById('confirmLogout').addEventListener('click', function() {
     alert('Anda telah logout!');
@@ -722,7 +772,35 @@ require_login();
       row.style.display = text.includes(filter) ? '' : 'none';
     });
   });
-</script>
+</script> -->
   
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const selectKamar = document.getElementById('kamar');
+  const hargaPerBulan = document.getElementById('hargaPerBulan');
+  const durasiSewa = document.getElementById('durasiSewa');
+  const totalPembayaran = document.getElementById('totalPembayaran');
+
+  function updateHargaDanTotal() {
+    const selected = selectKamar.options[selectKamar.selectedIndex];
+    const harga = selected ? parseInt(selected.getAttribute('data-harga')) : 0;
+    hargaPerBulan.value = harga.toLocaleString('id-ID');
+    // Hitung total pembayaran
+    const durasi = parseInt(durasiSewa.value) || 1;
+    totalPembayaran.value = (harga * durasi).toLocaleString('id-ID');
+  }
+
+  selectKamar.addEventListener('change', updateHargaDanTotal);
+  durasiSewa.addEventListener('change', updateHargaDanTotal);
+
+  // Set harga awal saat modal dibuka
+  updateHargaDanTotal();
+  });
+
+  
+</script>
+
+
 </body>
 </html>

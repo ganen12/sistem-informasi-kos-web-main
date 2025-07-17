@@ -6,4 +6,11 @@ function require_login() {
         exit();
     }
 }
+
+function require_role($required_role) {
+    if (!isset($_SESSION['role']) || $_SESSION['role'] != $required_role) {
+        header("Location: ../login/login.php?login_error=" . urlencode("Akses ditolak. Peran tidak sesuai."));
+        exit();
+    }
+}
 ?>

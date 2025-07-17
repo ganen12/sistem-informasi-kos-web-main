@@ -3,6 +3,7 @@ require_once "../../helpers/auth.php";
 require_login();
 ?>
 
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -53,38 +54,58 @@ require_login();
     }
   </style>
 </head>
+
 <body>
 
-      <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <a class="navbar-brand fw-bold text-warning ms-4" href="#">Hunian.id</a>
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle me-2"></i> Seller
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <!-- Navbar -->
+  <?php include '../partials/navbar.php'; ?>
+
+
+  <?php
+  include "../../../config/database.php";
+  // session_start();
+  $user_id = $_SESSION['user_id'] ?? 0;
+
+  $query = "SELECT 
+      p.payment_id,
+      p.payment_date,
+      p.payment_total,
+      p.amount_paid,
+      p.payment_due_date,
+      p.status,
+      t.name AS tenant_name
+    FROM payments p
+    JOIN room_transactions rt ON p.payment_id = rt.payment_id
+    JOIN tenants t ON rt.tenant_id = t.tenant_id
+    JOIN rooms r ON rt.room_no = r.room_no
+    JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+    WHERE rp.user_id = ?
+    ORDER BY p.payment_date DESC";
+
+  $stmt = mysqli_prepare($link, $query);
+  mysqli_stmt_bind_param($stmt, "i", $user_id);
+  mysqli_stmt_execute($stmt);
+  $result = mysqli_stmt_get_result($stmt);
+
+  $rows = [];
+  while ($row = mysqli_fetch_assoc($result)) {
+    $rows[] = $row;
+  }
+
+  $total_pembayaran = 0;
+  $total_dibayar = 0;
+  $total_belum_dibayar = 0;
+
+  foreach ($rows as $row) {
+    $total_pembayaran += $row['payment_total'];
+    $total_dibayar    += $row['amount_paid'];
+
+    if ($row['status'] !== 'Lunas') {
+      $total_belum_dibayar += $row['payment_total'] - $row['amount_paid'];
+    }
+  }
+
+  ?>
 
   <!-- Main Layout -->
   <div class="container-fluid">
@@ -119,8 +140,8 @@ require_login();
               <div class="card text-white bg-warning card-stat p-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h4 id="totalSewaCount">0</h4>
-                    <p class="mb-0">Total Pembayaran</p>
+                  <h4>Rp <?= number_format($total_pembayaran, 0, ',', '.') ?></h4>
+                  <p class="mb-0">Total Pembayaran</p>
                   </div>
                   <i class="bi bi-calendar-event-fill card-icon"></i>
                 </div>
@@ -130,7 +151,7 @@ require_login();
               <div class="card text-white bg-success card-stat p-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 id="totalDibayar">0</h5>
+                    <h5>Rp <?= number_format($total_dibayar, 0, ',', '.') ?></h5>
                     <p class="mb-0">Dibayar</p>
                   </div>
                   <i class="bi bi-arrow-up-right-circle-fill card-icon"></i>
@@ -141,7 +162,7 @@ require_login();
               <div class="card text-white bg-danger card-stat p-3">
                 <div class="d-flex justify-content-between align-items-center">
                   <div>
-                    <h5 id="totalBelumDibayar">0</h5>
+                    <h5>Rp <?= number_format($total_belum_dibayar, 0, ',', '.') ?></h5>
                     <p class="mb-0">Belum Dibayar</p>
                   </div>
                   <i class="bi bi-arrow-down-left-circle-fill card-icon"></i>
@@ -178,7 +199,51 @@ require_login();
                 </tr>
               </thead>
               <tbody id="tabelPembayaran">
-                <!-- Data ditambahkan otomatis -->
+                <?php if (count($rows) > 0): ?>
+                <?php foreach ($rows as $row): ?>
+                  <?php
+                    $badge = 'bg-danger';
+                    if ($row['status'] === 'Lunas') {
+                      $badge = 'bg-success';
+                    } elseif ($row['status'] === 'Belum Lunas') {
+                      $badge = 'bg-warning text-dark';
+                    }
+                  ?>
+                  <tr>
+                    <td><?= date('d M Y', strtotime($row['payment_date'])) ?></td>
+                    <td><?= htmlspecialchars($row['tenant_name']) ?></td>
+                    <td>Rp <?= number_format($row['payment_total'], 0, ',', '.') ?></td>
+                    <td>Rp <?= number_format($row['amount_paid'], 0, ',', '.') ?></td>
+                    <td><?= date('d M Y', strtotime($row['payment_due_date'])) ?></td>
+                    <td><span class="badge <?= $badge ?>"><?= $row['status'] ?></span></td>
+                    <td>
+                    <button 
+                      class="btn btn-sm btn-outline-primary btn-edit-pembayaran"
+                      data-bs-toggle="modal"
+                      data-bs-target="#editPembayaranModal"
+                      data-id="<?= $row['payment_id'] ?>"
+                      data-date="<?= $row['payment_date'] ?>"
+                      data-name="<?= htmlspecialchars($row['tenant_name']) ?>"
+                      data-total="<?= $row['payment_total'] ?>"
+                      data-paid="<?= $row['amount_paid'] ?>"
+                      data-due="<?= $row['payment_due_date'] ?>"
+                      data-status="<?= $row['status'] ?>"
+                    >
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <form method="POST" action="../../controllers/pembayaran/aksi_hapus_pembayaran.php" class="d-inline"
+                          onsubmit="return confirm('Yakin ingin menghapus data ini?');">
+                      <input type="hidden" name="payment_id" value="<?= $row['payment_id'] ?>">
+                      <button type="submit" class="btn btn-sm btn-outline-danger">
+                        <i class="bi bi-trash"></i>
+                      </button>
+                    </form>
+                  </td>
+                  </tr>
+                <?php endforeach; ?>
+              <?php else: ?>
+                <tr><td colspan="7" class="text-center text-muted">Belum ada data pembayaran.</td></tr>
+              <?php endif; ?>
               </tbody>
             </table>
           </div>
@@ -187,82 +252,135 @@ require_login();
     </div>
   </div>
 
-<!-- Modal Tambah Pembayaran -->
-<div class="modal fade" id="tambahPembayaranModal" tabindex="-1" aria-labelledby="tambahPembayaranLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="tambahPembayaranLabel">Tambah Pembayaran</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
-      <div class="modal-body">
-        <form id="formPembayaran">
-          <div class="mb-3">
-            <label class="form-label">Tanggal Pembayaran</label>
-            <input type="date" class="form-control" id="tanggalPembayaran" required>
+  <!-- Modal Tambah Pembayaran -->
+  <div class="modal fade" id="tambahPembayaranModal" tabindex="-1" aria-labelledby="tambahPembayaranLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="../../controllers/pembayaran/aksi_tambah_pembayaran.php" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="tambahPembayaranLabel">Tambah Pembayaran</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
           </div>
-          <div class="mb-3">
-            <label class="form-label">Nama Penyewa</label>
-            <input type="text" class="form-control" id="nama" required>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label">Tanggal Pembayaran</label>
+              <input type="date" class="form-control" name="payment_date" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Nama Penyewa</label>
+              <input type="text" class="form-control" id="nama_penyewa" readonly>
+
+              <select class="form-select" name="room_transaction_id" id="room_transaction_select" required>
+                <option value="" disabled selected>Pilih Penyewa</option>
+                <?php
+                $queryTrx = "SELECT 
+                              rt.room_transaction_id,
+                              t.name AS tenant_name,
+                              r.price_per_month,
+                              rt.rental_duration
+                            FROM room_transactions rt
+                            JOIN tenants t ON rt.tenant_id = t.tenant_id
+                            JOIN rooms r ON rt.room_no = r.room_no
+                            JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+                            WHERE rp.user_id = $user_id";
+
+                $resultTrx = mysqli_query($link, $queryTrx);
+                while ($row = mysqli_fetch_assoc($resultTrx)) {
+                    $duration = (int) filter_var($row['rental_duration'], FILTER_SANITIZE_NUMBER_INT);
+                    $total_payment = $row['price_per_month'] * $duration;
+                    echo "<option value='{$row['room_transaction_id']}' data-total='{$total_payment}' data-name='".htmlspecialchars($row['tenant_name'])."'>
+                            {$row['tenant_name']} (Rp " . number_format($total_payment, 0, ',', '.') . ")
+                          </option>";
+                }
+                ?>
+              </select>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Total Tagihan (Rp)</label>
+              <input type="number" class="form-control" name="payment_total" id="payment_total" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Jumlah Dibayar (Rp)</label>
+              <input type="number" class="form-control" name="amount_paid" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Jatuh Tempo</label>
+              <input type="date" class="form-control" name="payment_due_date" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Status Pembayaran</label>
+              <select class="form-select" name="status" required>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum Lunas">Belum Lunas</option>
+                <option value="Tertunda">Tertunda</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Simpan</button>
           </div>
-          <div class="mb-3">
-            <label class="form-label rupiah">Total Tagihan (Rp)</label>
-            <input type="number" class="form-control" id="totalSewa" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label rupiah">Jumlah Dibayar (Rp)</label>
-            <input type="number" class="form-control" id="jumlahDibayar" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Jatuh Tempo</label>
-            <input type="date" class="form-control" id="jatuhTempo" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label">Status Pembayaran</label>
-            <select class="form-select" id="statusPembayaran" required>
-              <option value="Lunas">Lunas</option>
-              <option value="Belum Lunas">Belum Lunas</option>
-              <option value="Tertunda">Tertunda</option>
-            </select>
-          </div>
-          <button type="submit" class="btn btn-primary">Simpan</button>
         </form>
       </div>
     </div>
   </div>
-</div>
-  
-  <!-- Modal Logout -->
-  <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content border-0">
-            <div class="modal-header bg-danger text-white">
-            <h5 class="modal-title" id="logoutModalLabel">Konfirmasi Logout</h5>
-            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+
+  <!-- Modal Edit Pembayaran -->
+  <div class="modal fade" id="editPembayaranModal" tabindex="-1" aria-labelledby="editPembayaranLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <form action="../../controllers/pembayaran/aksi_edit_pembayaran.php" method="POST">
+          <div class="modal-header">
+            <h5 class="modal-title" id="editPembayaranLabel">Edit Pembayaran</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          </div>
+
+          <div class="modal-body">
+            <input type="hidden" name="payment_id" id="edit_payment_id">
+
+            <div class="mb-3">
+              <label class="form-label">Tanggal Pembayaran</label>
+              <input type="date" class="form-control" name="payment_date" id="edit_payment_date" required>
             </div>
-            <div class="modal-body">
-            Apakah Anda yakin ingin keluar dari akun Anda?
+
+            <div class="mb-3">
+              <label class="form-label">Total Tagihan (Rp)</label>
+              <input type="number" class="form-control" name="payment_total" id="edit_payment_total" required>
             </div>
-            <div class="modal-footer justify-content-start">
-            <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
+
+            <div class="mb-3">
+              <label class="form-label">Jumlah Dibayar (Rp)</label>
+              <input type="number" class="form-control" name="amount_paid" id="edit_amount_paid" required>
             </div>
-        </div>
-    </div>
-  </div> 
-  
-  <div class="position-fixed bottom-0 end-0 p-3" style="z-index: 9999">
-    <div id="toastNotifikasi" class="toast align-items-center text-bg-success border-0" role="alert" aria-live="assertive" aria-atomic="true">
-      <div class="d-flex">
-        <div class="toast-body" id="pesanToast">Berhasil!</div>
-        <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast" aria-label="Close"></button>
+
+            <div class="mb-3">
+              <label class="form-label">Jatuh Tempo</label>
+              <input type="date" class="form-control" name="payment_due_date" id="edit_payment_due_date" required>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label">Status Pembayaran</label>
+              <select class="form-select" name="status" id="edit_status" required>
+                <option value="Lunas">Lunas</option>
+                <option value="Belum Lunas">Belum Lunas</option>
+                <option value="Tertunda">Tertunda</option>
+              </select>
+            </div>
+
+            <button type="submit" class="btn btn-primary w-100">Update</button>
+          </div>
+        </form>
       </div>
     </div>
   </div>
 
+
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
-<script src="js/pembayaran.js"></script>
-<script src="js/navbar.js"></script>
-  
+<script src="../../../public/js//pembayaran.js"></script>
+
 </body>
 </html>

@@ -1,6 +1,9 @@
 <?php
 include "../../../config/database.php";
 
+require_once "../../helpers/auth.php";
+require_login();
+
 $keyword = trim($_GET['keyword'] ?? '');
 
 $where = "WHERE 1=1";
@@ -27,17 +30,39 @@ $result = mysqli_query($link, $query);
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Montserrat', sans-serif; }
-    .card { height: 100%; display: flex; flex-direction: column; }
-    .card-img-top { height: 220px; object-fit: cover; }
-    .card-body { flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+    body {
+      font-family: 'Montserrat', sans-serif;
+    }
+    .card {
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+    .card-img-top {
+      height: 220px;
+      object-fit: cover;
+    }
+    .card-body {
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .rent-badge {
+      background-color: #17a2b8;
+      color: white;
+    }
+    .kontrakan-badge {
+      background-color: #6c757d;
+      color: white;
+    }
   </style>
 </head>
 <body>
+  <!-- Navbar -->
+    <?php include '../partials/navbar_pembeli.php'; ?>
 
-
-<?php include '../partials/navbar.php'; ?>
-
+    
 <div class="container py-4">
   <!-- Search Form -->
   <form class="row g-2 mb-4" method="GET" action="">
@@ -109,7 +134,10 @@ $result = mysqli_query($link, $query);
         </div>
     </section>
 
+  <!-- Footer -->
 <?php include '../partials/footer.php'; ?>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

@@ -3,6 +3,35 @@ require_once "../../helpers/auth.php";
 require_login();
 ?>
 
+<?php
+
+include "../../../config/database.php";
+
+$user_id = $_SESSION['user_id'] ?? 0;
+
+?>
+
+<?php
+$editKeluhan = null;
+if (isset($_GET['edit'])) {
+    $editKeluhanId = $_GET['edit'];
+    $queryEdit = "
+    SELECT c.*, t.name
+    FROM complaints c
+    INNER JOIN tenants t ON c.tenant_id = t.tenant_id
+    INNER JOIN users u ON t.user_id = u.id
+    WHERE t.user_id = ? AND c.complaint_id = ?
+    ORDER BY c.complaint_id
+    ";
+
+    $stmt = mysqli_prepare($link, $queryEdit);
+    mysqli_stmt_bind_param($stmt, "ii", $user_id, $editKeluhanId);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $editKeluhan = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
+?>
 <!doctype html>
 <html lang="en">
 <head>
@@ -56,35 +85,7 @@ require_login();
 </head>
 <body>
       <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <a class="navbar-brand fw-bold text-warning ms-4" href="#">Hunian.id</a>
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle me-2"></i> Seller
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <?php include '../partials/navbar.php'; ?>
 
 <div class="container-fluid">
   <div class="row">
@@ -94,6 +95,20 @@ require_login();
 
     <!-- Main -->
     <main class="col-md-10 ms-sm-auto col-lg-10" style="padding: 0;">
+    <!-- Alert Messages -->
+        <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_GET['error']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_GET['success']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
       <!-- Top Navbar -->
       <!-- <div class="d-flex justify-content-between align-items-center py-3 brand px-4">
         <div class="h5 mb-0">Keluhan</div>
@@ -123,11 +138,22 @@ require_login();
           </div>
         
           <table class="table table-striped">
+            <?php
+                // Ambil data kamar beserta nama properti sewa milik user
+                $queryKamar = "SELECT c.*, t.name, r.room_no FROM complaints c
+                            INNER JOIN tenants t ON c.tenant_id = t.tenant_id
+                            INNER JOIN users u ON t.user_id = u.id
+                            INNER JOIN room_transactions rt ON t.tenant_id = rt.tenant_id
+                            INNER JOIN rooms r ON rt.room_no = r.room_no 
+                            WHERE t.user_id = $user_id
+                            ORDER BY c.complaint_id";
+                $resultKamar = mysqli_query($link, $queryKamar);
+            ?>
             <thead class="table-dark">
               <tr>
                 <th>No</th>
                 <th>Nama Penyewa</th>
-                <th>Nomor Kamar</th>
+                <th>No Kamar</th>
                 <th>Tanggal Keluhan</th>
                 <th>Isi Keluhan</th>
                 <th>Status</th>
@@ -135,7 +161,32 @@ require_login();
               </tr>
             </thead>
             <tbody id="tabelKeluhan">
-              <!-- Data keluhan ditambahkan di sini -->
+                <?php 
+                $room_no = '';
+                $no = 1;
+                while ($row = mysqli_fetch_assoc($resultKamar)) { 
+                    // Jika nomor kamar tidak ada ATAU bernilai null, tampilkan "-"
+
+                    if (empty($row['room_no']) || is_null($row['room_no'])) {
+                        $room_no = '-';
+                    } else {
+                        $room_no = htmlspecialchars($row['room_no']);
+                    }
+                ?>
+                <tr>
+                    <td><?= $no++; ?></td>
+                    <td><?= htmlspecialchars($row['name']); ?></td>
+                    <td><?= $room_no ?></td>
+                    <td><?= htmlspecialchars($row['complaint_date']); ?></td>
+                    <td><?= htmlspecialchars($row['complaint_description']); ?></td>
+                    <td><?= htmlspecialchars($row['status']); ?></td>
+                    <td>                   
+                        <a href="keluhan.php?edit=<?= $row['complaint_id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="../../controllers/keluhan/aksi_hapus_keluhan.php?complaint_id=<?= $row['complaint_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus keluhan ini?')">Hapus</a>
+                    </td>
+                </tr>
+                <?php } ?>
+
             </tbody>
           </table>
         </div>
@@ -147,18 +198,33 @@ require_login();
 <!-- Modal Keluhan -->
 <div class="modal fade" id="modalKeluhan" tabindex="-1" aria-labelledby="modalKeluhanLabel" aria-hidden="true">
   <div class="modal-dialog">
-    <form id="formKeluhan" class="modal-content">
+    <form action="../../controllers/keluhan/aksi_tambah_keluhan.php" method="POST" id="formKeluhan" class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title">Input Keluhan</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body">
-        <div class="mb-3"><label class="form-label">Nama Penyewa</label><input type="text" class="form-control" id="namaPenyewa" required></div>
-        <div class="mb-3"><label class="form-label">Nomor Kamar</label><input type="text" class="form-control" id="nomorKamar" required></div>
-        <div class="mb-3"><label class="form-label">Tanggal Keluhan</label><input type="date" class="form-control" id="tanggalKeluhan" required></div>
-        <div class="mb-3"><label class="form-label">Isi Keluhan</label><textarea class="form-control" id="isiKeluhan" rows="3" required></textarea></div>
+        <div class="mb-3">
+            <label class="form-label">Nama Penyewa</label>
+              <select class="form-select" id="tenant" name="tenant_id" required>
+                <?php
+                $queryTenants = "SELECT tenants.tenant_id, tenants.name 
+                                 FROM tenants 
+                                 INNER JOIN users ON tenants.user_id = users.id
+                                 INNER JOIN room_transactions ON tenants.tenant_id = room_transactions.tenant_id
+                                 WHERE tenants.user_id = $user_id AND users.id = $user_id";
+                $tenants = mysqli_query($link, $queryTenants); ?>
+                <?php while ($row = mysqli_fetch_assoc($tenants)): ?>
+                    <option value='<?= $row['tenant_id'] ?>'><?= htmlspecialchars($row['name']) ?></option>
+                <?php endwhile; ?>
+                
+              </select>        
+        </div>
+        <!-- <div class="mb-3"><label class="form-label">Nomor Kamar</label><input type="text" class="form-control" id="nomorKamar" required></div> -->
+        <div class="mb-3"><label class="form-label">Tanggal Keluhan</label><input name="complaint_date" type="date" class="form-control" id="tanggalKeluhan" required></div>
+        <div class="mb-3"><label class="form-label">Isi Keluhan</label><textarea name="complaint_description" class="form-control" id="isiKeluhan" rows="3" required></textarea></div>
         <div class="mb-3"><label class="form-label">Status</label>
-          <select class="form-select" id="statusKeluhan" required>
+          <select class="form-select" id="statusKeluhan" name="status" required>
             <option value="Belum Ditangani">Belum Ditangani</option>
             <option value="Diproses">Diproses</option>
             <option value="Selesai">Selesai</option>
@@ -171,6 +237,56 @@ require_login();
     </form>
   </div>
 </div>
+
+<!-- Modal edit keluhan -->
+ <?php if ($editKeluhan): ?>
+<div class="modal fade show d-block" id="modalKeluhan" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <form action="../../controllers/keluhan/aksi_edit_keluhan.php" method="POST" id="formKeluhan" class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">Edit Keluhan</h5>
+        <a href="keluhan.php" class="btn-close"></a>
+      </div>
+      <div class="modal-body">
+        <div class="mb-3">
+            <label class="form-label">Nama Penyewa</label>
+              <select class="form-select" id="tenant" name="tenant_id" required>
+                <?php
+                $queryTenants = "SELECT tenants.tenant_id, tenants.name 
+                                 FROM tenants 
+                                 INNER JOIN users ON tenants.user_id = users.id
+                                 INNER JOIN room_transactions ON tenants.tenant_id = room_transactions.tenant_id
+                                 WHERE tenants.user_id = $user_id AND users.id = $user_id";
+                $tenants = mysqli_query($link, $queryTenants); ?>
+                <?php while ($row = mysqli_fetch_assoc($tenants)): ?>
+                    <option value='<?= $row['tenant_id'] ?>' <?= $row['tenant_id'] == $editKeluhan['tenant_id'] ? 'selected' : '' ?>><?= htmlspecialchars($row['name']) ?></option>
+                <?php endwhile; ?>
+                
+              </select>        
+        </div>
+        <input type="hidden" name="complaint_id" value="<?= $editKeluhan['complaint_id'] ?>">
+        <!-- <div class="mb-3"><label class="form-label">Nomor Kamar</label><input type="text" class="form-control" id="nomorKamar" required></div> -->
+        <div class="mb-3"><label class="form-label">Tanggal Keluhan</label>
+            <input name="complaint_date" type="date" class="form-control" id="tanggalKeluhan" value="<?= htmlspecialchars($editKeluhan['complaint_date']) ?>" required>
+        </div>
+        <div class="mb-3"><label class="form-label">Isi Keluhan</label>
+            <textarea name="complaint_description" class="form-control" id="isiKeluhan" rows="3" required><?= htmlspecialchars($editKeluhan['complaint_description']) ?></textarea>
+        </div>
+        <div class="mb-3"><label class="form-label">Status</label>
+          <select class="form-select" id="statusKeluhan" name="status" required>
+            <option value="Belum Ditangani" <?= $editKeluhan['status'] == 'Belum Ditangani' ? 'selected' : '' ?>>Belum Ditangani</option>
+            <option value="Diproses" <?= $editKeluhan['status'] == 'Diproses' ? 'selected' : '' ?>>Diproses</option>
+            <option value="Selesai" <?= $editKeluhan['status'] == 'Selesai' ? 'selected' : '' ?>>Selesai</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="submit" class="btn btn-primary">Simpan</button>
+      </div>
+    </form>
+  </div>
+</div>
+<?php endif; ?>
 
 <!-- logout confirmation modal -->
 <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">

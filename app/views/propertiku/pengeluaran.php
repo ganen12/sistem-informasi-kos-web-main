@@ -3,6 +3,35 @@ require_once "../../helpers/auth.php";
 require_login();
 ?>
 
+<?php
+
+include "../../../config/database.php";
+
+$user_id = $_SESSION['user_id'] ?? 0;
+
+?>
+
+<?php
+$editExpense = null;
+if (isset($_GET['edit'])) {
+    $editExpenseId = $_GET['edit'];
+    $queryEdit = "
+    SELECT e.*
+    FROM expenses e
+    INNER JOIN users u ON e.user_id = u.id
+    WHERE e.expense_id = ? AND u.id = ?
+    ORDER BY e.expense_id
+    ";
+
+    $stmt = mysqli_prepare($link, $queryEdit);
+    mysqli_stmt_bind_param($stmt, "ii", $editExpenseId, $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    $editExpense = mysqli_fetch_assoc($result);
+    mysqli_stmt_close($stmt);
+}
+?>
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -56,35 +85,7 @@ require_login();
 <body>
 
       <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <a class="navbar-brand fw-bold text-warning ms-4" href="#">Hunian.id</a>
-    <div class="container">
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.html">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.html">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.html">Sewa</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
-          <li class="nav-item dropdown">
-            <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-              <i class="bi bi-person-circle me-2"></i> Seller
-            </a>
-            <ul class="dropdown-menu dropdown-menu-end">
-              <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
-              <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
-              <li><hr class="dropdown-divider"></li>
-              <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-            </ul>
-          </li>
-        </ul>
-      </div>
-    </div>
-  </nav>
+  <?php include '../partials/navbar.php'; ?>
 
   <!-- Main Layout -->
   <div class="container-fluid">
@@ -94,7 +95,21 @@ require_login();
       <?php include __DIR__ . '/../partials/sidebar_propertiku.php'; ?>
 
       <!-- Main Content -->
-      <main class="col-md-10 ms-sm-auto col-lg-10 p-4">
+        <main class="col-md-10 ms-sm-auto col-lg-10" style="padding: 0;">
+        <!-- Alert Messages -->
+        <?php if (isset($_GET['error'])): ?>
+        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_GET['error']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
+
+        <?php if (isset($_GET['success'])): ?>
+        <div class="alert alert-success alert-dismissible fade show" role="alert">
+            <?= htmlspecialchars($_GET['success']) ?>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        <?php endif; ?>
         <div class="container mt-4">
           <div class="row mb-4 align-items-center">
               <div class="col-md-4">
@@ -165,16 +180,39 @@ require_login();
               </div>
             </div>
             <table class="table table-striped">
+            <?php
+                // Ambil data kamar beserta nama properti sewa milik user
+                $queryExpense = "SELECT expenses.* FROM expenses
+                            INNER JOIN users ON expenses.user_id = users.id
+                            WHERE expenses.user_id = $user_id
+                            ORDER BY expenses.expense_id";
+                $resultExpense = mysqli_query($link, $queryExpense);
+            ?>
               <thead class="table-dark">
                 <tr>
+                  <th>No</th>
                   <th>Tanggal</th>
                   <th>Deskripsi</th>
-                  <th>Jumlah</th>
+                  <th>Jumlah Pengeluaran (Rp)</th>
                   <th>Aksi</th>
                 </tr>
               </thead>
               <tbody id="tabelPengeluaran">
-                <!-- Data otomatis diisi JS -->
+                <?php 
+                $no = 1;
+                while ($row = mysqli_fetch_assoc($resultExpense)) { 
+                ?>
+                <tr>
+                    <td><?= $no++; ?></td>
+                    <td><?= htmlspecialchars($row['expense_date']); ?></td>
+                    <td><?= htmlspecialchars($row['description']); ?></td>
+                    <td><?= htmlspecialchars($row['expense_total']); ?></td>
+                    <td>                   
+                        <a href="pengeluaran.php?edit=<?= $row['expense_id'] ?>" class="btn btn-sm btn-primary">Edit</a>
+                        <a href="../../controllers/pengeluaran/aksi_hapus_pengeluaran.php?expense_id=<?= $row['expense_id'] ?>" class="btn btn-sm btn-danger" onclick="return confirm('Yakin ingin menghapus expense ini?')">Hapus</a>
+                    </td>
+                </tr>
+                <?php } ?>
               </tbody>
             </table>
           </div>
@@ -183,7 +221,7 @@ require_login();
     </div>
   </div>
 
-<!-- Modal Tambah/Edit Pengeluaran -->
+<!-- Modal Tambah Pengeluaran -->
 <div class="modal fade" id="modalPengeluaran" tabindex="-1" aria-labelledby="modalPengeluaranLabel" aria-hidden="true">
   <div class="modal-dialog">
     <div class="modal-content">
@@ -192,18 +230,18 @@ require_login();
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="formPengeluaran">
+        <form action="../../controllers/pengeluaran/aksi_tambah_pengeluaran.php" method="POST" id="formPengeluaran">
           <div class="mb-3">
             <label class="form-label">Tanggal</label>
-            <input type="date" class="form-control" id="tanggal" required>
+            <input type="date" class="form-control" id="tanggal" name="expense_date" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Deskripsi</label>
-            <input type="text" class="form-control" id="deskripsi" required>
+            <input type="text" class="form-control" id="deskripsi" name="description" required>
           </div>
           <div class="mb-3">
             <label class="form-label">Jumlah (Rp)</label>
-            <input type="text" class="form-control rupiah" id="jumlah" required>
+            <input type="number" class="form-control rupiah" id="jumlah" name="expense_total" required>
           </div>
           <button type="submit" class="btn btn-primary">Simpan</button>
         </form>
@@ -211,6 +249,39 @@ require_login();
     </div>
   </div>
 </div>
+
+<!-- Modal Edit Pengeluaran -->
+  <?php if ($editExpense): ?>
+<div class="modal fade show d-block" id="modalPengeluaran" tabindex="-1" style="background:rgba(0,0,0,0.5);">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="modalPengeluaranLabel">Edit Pengeluaran</h5>
+        <a href="pengeluaran.php" class="btn-close"></a>
+      </div>
+      <div class="modal-body">
+        <form action="../../controllers/pengeluaran/aksi_edit_pengeluaran.php" method="POST" id="formPengeluaran">
+          <div class="mb-3">
+            <label class="form-label">Tanggal</label>
+            <input type="date" class="form-control" id="tanggal" value="<?= $editExpense['expense_date'] ?>" name="expense_date" required>
+          </div>
+            <input type="hidden" name="expense_id" value="<?= $editExpense['expense_id'] ?>">
+          <div class="mb-3">
+            <label class="form-label">Deskripsi</label>
+            <input type="text" class="form-control" id="deskripsi" value="<?= $editExpense['description'] ?>" name="description" required>
+          </div>
+          <div class="mb-3">
+            <label class="form-label">Jumlah (Rp)</label>
+            <input type="number" class="form-control rupiah" id="jumlah" value="<?= $editExpense['expense_total'] ?>" name="expense_total" required>
+          </div>
+          <button type="submit" class="btn btn-primary">Simpan</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+<?php endif; ?>
+
   
   <!-- Modal Logout -->
   <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">

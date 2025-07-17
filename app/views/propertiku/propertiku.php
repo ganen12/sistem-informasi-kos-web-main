@@ -3,6 +3,12 @@ require_once "../../helpers/auth.php";
 require_login();
 ?>
 
+<?php
+    include "../../../config/database.php";
+
+    $user_id = $_SESSION['user_id'] ?? 0;
+?>
+
 <!doctype html>
 <html lang="id">
 <head>
@@ -65,36 +71,74 @@ require_login();
 </head>
 <body>
 
-    <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-        <div class="container">
-            <a class="navbar-brand fw-bold text-warning" href="#">Hunian.id</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-            <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item"><a class="nav-link" href="dashboardpemilik.php">Beranda</a></li>
-          <li class="nav-item"><a class="nav-link" href="Beli.php">Beli</a></li>
-          <li class="nav-item"><a class="nav-link" href="Sewa.php">Sewa</a></li>
-          <li class="nav-item"><a class="nav-link active" href="#">Propertiku</a></li>
-          <li class="nav-item"><a class="nav-link" href="#">Bantuan</a></li>
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                    <i class="bi bi-person-circle me-2"></i> Seller
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
-                    <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
-                    <li><hr class="dropdown-divider"></li>
-                    <li><a class="dropdown-item text-danger" href="#" data-bs-toggle="modal" data-bs-target="#logoutModal"><i class="bi bi-box-arrow-right me-2"></i> Logout</a></li>
-                    </ul>
-                </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
+<?php
+// Total kamar terisi & kosong
+$query_rooms = "SELECT status FROM rooms r
+JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+WHERE rp.user_id = ?";
+$stmt_rooms = mysqli_prepare($link, $query_rooms);
+mysqli_stmt_bind_param($stmt_rooms, "i", $user_id);
+mysqli_stmt_execute($stmt_rooms);
+$result_rooms = mysqli_stmt_get_result($stmt_rooms);
+
+$kamar_terisi = $kamar_kosong = 0;
+while ($r = mysqli_fetch_assoc($result_rooms)) {
+  if ($r['status'] === 'Disewa') $kamar_terisi++;
+  if ($r['status'] === 'Tersedia') $kamar_kosong++;
+}
+
+// Total pemasukan
+$query_income = "SELECT p.amount_paid FROM payments p
+JOIN room_transactions rt ON p.payment_id = rt.payment_id
+JOIN rooms r ON rt.room_no = r.room_no
+JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+WHERE rp.user_id = ?";
+$stmt_income = mysqli_prepare($link, $query_income);
+mysqli_stmt_bind_param($stmt_income, "i", $user_id);
+mysqli_stmt_execute($stmt_income);
+$res_income = mysqli_stmt_get_result($stmt_income);
+$total_income = 0;
+while ($r = mysqli_fetch_assoc($res_income)) {
+  $total_income += (int)$r['amount_paid'];
+}
+
+// Total pengeluaran
+$query_exp = "SELECT expense_total FROM expenses WHERE user_id = ?";
+$stmt_exp = mysqli_prepare($link, $query_exp);
+mysqli_stmt_bind_param($stmt_exp, "i", $user_id);
+mysqli_stmt_execute($stmt_exp);
+$res_exp = mysqli_stmt_get_result($stmt_exp);
+$total_expense = 0;
+while ($r = mysqli_fetch_assoc($res_exp)) {
+  $total_expense += (int)$r['expense_total'];
+}
+
+// Pengingat Jatuh Tempo
+$today = date('Y-m-d');
+$query_due = "SELECT p.payment_due_date, t.name FROM payments p
+JOIN room_transactions rt ON rt.payment_id = p.payment_id
+JOIN tenants t ON t.tenant_id = rt.tenant_id
+JOIN rooms r ON rt.room_no = r.room_no
+JOIN rental_properties rp ON r.rental_property_id = rp.rental_property_id
+WHERE rp.user_id = ? AND p.payment_due_date >= ? AND p.status != 'Lunas'
+ORDER BY p.payment_due_date ASC LIMIT 5";
+$stmt_due = mysqli_prepare($link, $query_due);
+mysqli_stmt_bind_param($stmt_due, "is", $user_id, $today);
+mysqli_stmt_execute($stmt_due);
+$res_due = mysqli_stmt_get_result($stmt_due);
+$reminders = mysqli_fetch_all($res_due, MYSQLI_ASSOC);
+
+// Pengeluaran terbaru
+$query_latest_exp = "SELECT description, expense_date FROM expenses WHERE user_id = ? ORDER BY expense_date DESC LIMIT 5";
+$stmt_latest_exp = mysqli_prepare($link, $query_latest_exp);
+mysqli_stmt_bind_param($stmt_latest_exp, "i", $user_id);
+mysqli_stmt_execute($stmt_latest_exp);
+$res_latest_exp = mysqli_stmt_get_result($stmt_latest_exp);
+$latest_expenses = mysqli_fetch_all($res_latest_exp, MYSQLI_ASSOC);
+?>
+
+<?php include '../partials/navbar.php'; ?>
+    
 
     <div class="container-fluid">
         <div class="row">
@@ -128,7 +172,7 @@ require_login();
                     <div class="card text-white bg-success card-stat p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 id="cardKamarTerisi">0</h4>
+                                <h4 id="cardKamarTerisi"><?= $kamar_terisi ?></h4>
                                 <p class="mb-0">Kamar Terisi</p>
                             </div>
                                 <i class="bi bi-house-door-fill card-icon"></i>
@@ -139,7 +183,7 @@ require_login();
                     <div class="card text-white bg-danger card-stat p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h4 id="cardKamarKosong">0</h4>
+                                <h4 id="cardKamarKosong"><?= $kamar_kosong ?></h4>
                                 <p class="mb-0">Kamar Kosong</p>
                             </div>
                                 <i class="bi bi-house-door card-icon"></i>
@@ -150,7 +194,7 @@ require_login();
                     <div class="card text-white bg-warning card-stat p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 id="cardPemasukan">Rp. 0</h5>
+                                <h5 id="cardPemasukan">Rp <?= number_format($total_income, 0, ',', '.') ?></h5>
                                 <p class="mb-0">Pemasukan</p>
                             </div>
                             <i class="bi bi-stack card-icon"></i>
@@ -161,7 +205,7 @@ require_login();
                     <div class="card text-white bg-primary card-stat p-3">
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
-                                <h5 id="cardPengeluaran">Rp. 0</h5>
+                                <h5 id="cardPengeluaran">Rp <?= number_format($total_expense, 0, ',', '.') ?></h5>
                                 <p class="mb-0">Pengeluaran</p>
                             </div>
                             <i class="bi bi-stack card-icon"></i>
@@ -240,33 +284,35 @@ require_login();
         </div>
     </div>
 
-    <!-- Modal Logout -->
-    <div class="modal fade" id="logoutModal" tabindex="-1" aria-labelledby="logoutModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content border-0">
-                <div class="modal-header bg-danger text-white">
-                <h5 class="modal-title" id="logoutModalLabel">Konfirmasi Logout</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                Apakah Anda yakin ingin keluar dari akun Anda?
-                </div>
-                <div class="modal-footer justify-content-start">
-                <button type="button" class="btn btn-danger" id="confirmLogout">Logout</button>
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Batal</button>
-                </div>
-            </div>
-        </div>
-    </div>    
-
-<footer class="bg-dark text-white text-center py-3">
-<p class="mb-0">&copy; 2025 Hunian.id. All Rights Reserved.</p>
-</footer>
-
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 
-<script src="js/propertiku.js"></script>
-<script src="js/logout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  document.getElementById('cardKamarTerisi').textContent = "<?= $kamar_terisi ?>";
+  document.getElementById('cardKamarKosong').textContent = "<?= $kamar_kosong ?>";
+  document.getElementById('cardPemasukan').textContent = "Rp <?= number_format($total_income, 0, ',', '.') ?>";
+  document.getElementById('cardPengeluaran').textContent = "Rp <?= number_format($total_expense, 0, ',', '.') ?>";
+
+  const list = document.getElementById('pengingatList');
+  <?php foreach ($reminders as $r): ?>
+    li = document.createElement('div');
+    li.className = 'list-group-item';
+    li.textContent = "<?= htmlspecialchars($r['name']) ?> - Jatuh Tempo: <?= date('d M Y', strtotime($r['payment_due_date'])) ?>";
+    list.appendChild(li);
+  <?php endforeach; ?>
+
+  const expList = document.getElementById('pengeluaranTerbaruList');
+  <?php foreach ($latest_expenses as $e): ?>
+    li = document.createElement('div');
+    li.className = 'list-group-item';
+    li.textContent = "<?= htmlspecialchars($e['description']) ?> - <?= date('d M Y', strtotime($e['expense_date'])) ?>";
+    expList.appendChild(li);
+  <?php endforeach; ?>
+});
+</script>
+
+<!-- <script src="js/propertiku.js"></script>
+<script src="js/logout.js"></script> -->
 
 </body>
 </html>

@@ -1,6 +1,7 @@
 <?php
 require_once "../../helpers/auth.php";
 require_login();
+require_role('pemilik');
 ?>
 
 <?php
@@ -59,54 +60,8 @@ $namaLengkap = $_SESSION['nama_lengkap'] ?? 'User';
 <body>
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
-    <div class="container">
-      <a class="navbar-brand fw-bold text-warning" href="../dashboard/dashboardpemilik.php">Hunian.id</a>
-      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
-        <span class="navbar-toggler-icon"></span>
-      </button>
+  <?php include '../partials/navbar.php'; ?>
 
-      <div class="collapse navbar-collapse" id="navbarNav">
-        <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-          <li class="nav-item">
-            <a class="nav-link <?= basename($_SERVER['PHP_SELF']) == 'dashboardpemilik.php' ? 'active' : '' ?>" href="../dashboard/dashboardpemilik.php">Beranda</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="../eksplor/Beli.php">Beli</a>
-          </li>
-          <li class="nav-item">
-            <a class="nav-link" href="../eksplor/Sewa.php">Sewa</a>
-          </li>
-
-          <?php if ($isLoggedIn): ?>
-            <li class="nav-item">
-              <a class="nav-link" href="../propertiku/propertiku.php">Propertiku</a>
-            </li>
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" role="button" data-bs-toggle="dropdown">
-                <i class="bi bi-person-circle me-2"></i> <?= htmlspecialchars($namaLengkap) ?>
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" href="#"><i class="bi bi-bookmark-heart me-2"></i> Tersimpan</a></li>
-                <li><a class="dropdown-item" href="#"><i class="bi bi-clock-history me-2"></i> Terakhir Dilihat</a></li>
-                <li><a class="dropdown-item" href="#"><i class="bi bi-chat-dots me-2"></i> Forum Pemilik</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li>
-                  <a class="dropdown-item text-danger" href="../auth/logout.php">
-                    <i class="bi bi-box-arrow-right me-2"></i> Logout
-                  </a>
-                </li>
-              </ul>
-            </li>
-          <?php else: ?>
-            <li class="nav-item">
-              <a class="nav-link" href="../auth/login.php">Login</a>
-            </li>
-          <?php endif; ?>
-        </ul>
-      </div>
-    </div>
-  </nav>
 
 
   <!-- Hero Section -->
@@ -251,9 +206,7 @@ $namaLengkap = $_SESSION['nama_lengkap'] ?? 'User';
   </div>
 
 <!-- Footer -->
-<footer class="bg-dark text-white text-center py-3">
-  <p class="mb-0">&copy; 2025 Hunian.id. All Rights Reserved.</p>
-</footer>
+<?php include 'partials/footer.php'; ?>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 

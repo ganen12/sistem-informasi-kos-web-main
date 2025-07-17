@@ -2,6 +2,7 @@
     <?php
     require_once "../../helpers/auth.php";
     require_login();
+    require_role('pembeli');
     ?>
 
 <!doctype html>
@@ -37,7 +38,7 @@
       }
 
     .hero {
-        background: url('/Asset/Hero.png') center/cover no-repeat;
+        background: url('../../uploads/default_template/Hero.png') center/cover no-repeat;
         color: white;
         padding: 8rem 2rem 6rem; /* Atas, samping, bawah */
         display: flex;
@@ -56,7 +57,8 @@
 
 
   <!-- Navbar -->
-  <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
+    <?php include '../partials/navbar_pembeli.php'; ?>
+  <!-- <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm sticky-top">
     <div class="container">
       <a class="navbar-brand fw-bold text-warning" href="#">Hunian.id</a>
       <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -68,10 +70,10 @@
             <a class="nav-link active" href="#">Beranda</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Pembeli_Beli.html">Beli</a>
+            <a class="nav-link" href="../eksplor pembeli/pembeli_beli.php">Beli</a>
           </li>
           <li class="nav-item">
-            <a class="nav-link" href="Pembeli_Sewa.html">Sewa</a>
+            <a class="nav-link" href="../eksplor pembeli/pembeli_sewa.php">Sewa</a>
           </li>
           <li class="nav-item">
             <a class="nav-link" href="#">Iklankan</a>
@@ -94,7 +96,7 @@
         </ul>
       </div>
     </div>
-  </nav>
+  </nav> -->
 
   <!-- Hero Section -->
   <section class="hero text-center">
@@ -134,33 +136,62 @@
     <div class="container">
       <h3 class="mb-4">Properti Terbaru</h3>
       <div class="row g-3">
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/kost1.jpg" class="card-img-top" alt="Kost">
-            <div class="card-body">
-              <h5 class="card-title">Kost Exclusive Jakarta Selatan</h5>
-              <p class="card-text">Rp 1.500.000 / bulan</p>
+        <?php
+          include "../../../config/database.php";
+
+          // Ambil dari selling_properties
+          $queryJual = "SELECT 'jual' as kategori, selling_property_id AS id, property_name, sale_price as harga, image, description FROM selling_properties ORDER BY created_at DESC LIMIT 3";
+          $resultJual = mysqli_query($link, $queryJual);
+
+          // Ambil dari rental_properties
+          $querySewa = "SELECT 'sewa' as kategori, rental_property_id AS id, property_name, rental_price as harga, image, facilities FROM rental_properties ORDER BY created_at DESC LIMIT 3";
+          $resultSewa = mysqli_query($link, $querySewa);
+
+          // Gabungkan hasil
+          $allProperties = [];
+          while ($row = mysqli_fetch_assoc($resultJual)) $allProperties[] = $row;
+          while ($row = mysqli_fetch_assoc($resultSewa)) $allProperties[] = $row;
+
+          // Sort by newest
+          usort($allProperties, fn($a, $b) => $b['id'] <=> $a['id']);
+
+          // Tampilkan max 6
+          $count = 0;
+          foreach ($allProperties as $prop):
+            if ($count++ >= 6) break;
+            if (!empty($prop['image'])) {
+                $imgPath = ($prop['kategori'] == 'jual')
+                    ? "../../uploads/jual/" . $prop['image']
+                    : "../../uploads/sewa/" . $prop['image'];
+            } else {
+                $imgPath = "https://via.placeholder.com/400x220";
+            }
+            $hargaFormatted = "Rp " . number_format($prop['harga'], 0, ',', '.');
+            $labelHarga = $prop['kategori'] == 'jual' ? $hargaFormatted : $hargaFormatted . " / bulan";
+            $detailLink = "../DetailProperti/detail_properti.php?kategori=" . urlencode($prop['kategori']) . "&id=" . urlencode($prop['id']);
+
+            // Ambil ringkasan fasilitas/description
+            $shortText = $prop['kategori'] == 'jual' ? $prop['description'] : $prop['facilities'];
+            $shortText = strip_tags($shortText ?? '');
+            if (strlen($shortText) > 60) $shortText = substr($shortText, 0, 57) . '...';
+        ?>
+          <div class="col-md-4">
+            <div class="card h-100 position-relative">
+              <a href="<?= $detailLink ?>" class="text-decoration-none text-dark">
+                <!-- Badge kategori -->
+                <span class="badge bg-<?= $prop['kategori'] == 'jual' ? 'primary' : 'success' ?> position-absolute m-2">
+                  <?= strtoupper($prop['kategori']) ?>
+                </span>
+                <img src="<?= $imgPath ?>" class="card-img-top" alt="<?= htmlspecialchars($prop['property_name']) ?>">
+                <div class="card-body">
+                  <h5 class="card-title"><?= htmlspecialchars($prop['property_name']) ?></h5>
+                  <p class="card-text mb-1"><?= $labelHarga ?></p>
+                  <small class="text-muted"><?= htmlspecialchars($shortText) ?></small>
+                </div>
+              </a>
             </div>
           </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/rumah1.jpg" class="card-img-top" alt="Rumah">
-            <div class="card-body">
-              <h5 class="card-title">Rumah Murah di Jogja</h5>
-              <p class="card-text">Rp 850.000.000</p>
-            </div>
-          </div>
-        </div>
-        <div class="col-md-4">
-          <div class="card">
-            <img src="/Asset/kontrakan1.jpg" class="card-img-top" alt="Kontrakan">
-            <div class="card-body">
-              <h5 class="card-title">Kontrakan Murah Dekat Kampus</h5>
-              <p class="card-text">Rp 800.000 / bulan</p>
-            </div>
-          </div>
-        </div>
+        <?php endforeach; ?>
       </div>
     </div>
   </section>
@@ -189,9 +220,8 @@
   </section>
 
   <!-- Footer -->
-  <footer class="bg-dark text-white text-center py-3">
-    <p class="mb-0">&copy; 2025 Hunian.id. All Rights Reserved.</p>
-  </footer>
+<?php include '../partials/footer.php'; ?>
+
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.6/dist/js/bootstrap.bundle.min.js"></script>
 </body>
