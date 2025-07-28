@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1:3306
--- Generation Time: Jul 27, 2025 at 12:46 PM
+-- Generation Time: Jul 28, 2025 at 04:59 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -267,6 +267,30 @@ INSERT INTO `users` (`id`, `nama_lengkap`, `email`, `password`, `role`, `created
 (15, 'testuser1pembeli', 'testemail1pembeli@gmail.com', 'sybau', 'pembeli', '2025-07-17 16:22:26', '2025-07-17 17:10:30', ''),
 (16, 'ganendra', 'ganen@gmail.com', 'sybau', 'pemilik', '2025-07-18 07:20:33', '2025-07-18 07:20:33', '082246659669');
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_favorite_rentals`
+--
+
+CREATE TABLE `user_favorite_rentals` (
+  `user_id` int(11) NOT NULL,
+  `rental_property_id` int(11) NOT NULL,
+  `favorite_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_favorite_selling`
+--
+
+CREATE TABLE `user_favorite_selling` (
+  `user_id` int(11) NOT NULL,
+  `selling_property_id` int(11) NOT NULL,
+  `added_date` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
@@ -334,6 +358,20 @@ ALTER TABLE `tenants`
 ALTER TABLE `users`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `email` (`email`);
+
+--
+-- Indexes for table `user_favorite_rentals`
+--
+ALTER TABLE `user_favorite_rentals`
+  ADD PRIMARY KEY (`user_id`,`rental_property_id`),
+  ADD KEY `rental_property_id` (`rental_property_id`);
+
+--
+-- Indexes for table `user_favorite_selling`
+--
+ALTER TABLE `user_favorite_selling`
+  ADD PRIMARY KEY (`user_id`,`selling_property_id`),
+  ADD KEY `selling_property_id` (`selling_property_id`);
 
 --
 -- AUTO_INCREMENT for dumped tables
@@ -434,6 +472,20 @@ ALTER TABLE `selling_properties`
 --
 ALTER TABLE `tenants`
   ADD CONSTRAINT `fk_tenants_user` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE ON UPDATE CASCADE;
+
+--
+-- Constraints for table `user_favorite_rentals`
+--
+ALTER TABLE `user_favorite_rentals`
+  ADD CONSTRAINT `user_favorite_rentals_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `user_favorite_rentals_ibfk_2` FOREIGN KEY (`rental_property_id`) REFERENCES `rental_properties` (`rental_property_id`);
+
+--
+-- Constraints for table `user_favorite_selling`
+--
+ALTER TABLE `user_favorite_selling`
+  ADD CONSTRAINT `user_favorite_selling_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `user_favorite_selling_ibfk_2` FOREIGN KEY (`selling_property_id`) REFERENCES `selling_properties` (`selling_property_id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
